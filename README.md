@@ -1,8 +1,8 @@
 # ComponentArrays.jl
 ![](assets/logo.png)
 
-| **Documentation**                                                               | **Build Status**                                                                                |
-|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| **Documentation**                                                         | **Build Status**                                            |
+|:-------------------------------------------------------------------------:|:-----------------------------------------------------------:|
 | [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][build-img]][build-url] [![][codecov-img]][codecov-url] |
 
 
@@ -12,11 +12,11 @@
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://sciml.github.io/ComponentArrays.jl/stable
 
-[build-img]: https://img.shields.io/github/actions/workflow/status/jonniedie/ComponentArrays.jl/ci.yml
-[build-url]: https://github.com/jonniedie/docs/ComponentArrays.jl/workflows/ci.yml
+[build-img]: https://img.shields.io/github/actions/workflow/status/SciML/ComponentArrays.jl/ci.yml
+[build-url]: https://github.com/SciML/ComponentArrays.jl/actions/workflows/ci.yml
 
-[codecov-img]: https://img.shields.io/codecov/c/github/jonniedie/ComponentArrays.jl
-[codecov-url]: https://codecov.io/gh/jonniedie/ComponentArrays.jl
+[codecov-img]: https://img.shields.io/codecov/c/github/SciML/ComponentArrays.jl
+[codecov-url]: https://codecov.io/gh/SciML/ComponentArrays.jl
 
 The main export of this package is the ````ComponentArray```` type. "Components" of ````ComponentArray````s
 are really just array blocks that can be accessed through a named index. This will create a new ```ComponentArray``` whose data is a view into the original,
@@ -27,7 +27,7 @@ in [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl)
 [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl), but anything that requires
 flat vectors is fair game.
 
-Check out the [NEWS](https://github.com/jonniedie/ComponentArrays.jl/blob/master/NEWS.md) for new features by minor release version.
+Check out the [NEWS](https://github.com/SciML/ComponentArrays.jl/blob/master/NEWS.md) for new features by minor release version.
 
 
 ## General use
@@ -45,7 +45,7 @@ julia> x[8]
 400.0
 
 julia> collect(x)
-10-element Array{Float64,1}:
+10-element Vector{Float64}:
    5.0
   20.0
    0.0

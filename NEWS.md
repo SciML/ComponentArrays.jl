@@ -1,5 +1,5 @@
 # ComponentArrays.jl NEWS
-Notes on new features (minor releases). For more details on bugfixes and non-feature-adding changes (patch releases), check out the [releases page](https://github.com/jonniedie/ComponentArrays.jl/releases).
+Notes on new features (minor releases). For more details on bugfixes and non-feature-adding changes (patch releases), check out the [releases page](https://github.com/SciML/ComponentArrays.jl/releases).
 
 ### v0.15.0
 - Unpack array components as `StaticArray`s!
@@ -27,7 +27,7 @@ ComponentVector{Float64,SubArray...}(e = 2.0, f = [6.0, 30.0])
 
 ### v0.12.0
 - Multiple symbol indexing!
-  - Use either an `Array` or `Tuple` of `Symbol`s to extract multiple named components into a new `ComponentArray
+  - Use either an `Array` or `Tuple` of `Symbol`s to extract multiple named components into a new `ComponentArray`
   - It's fast!
 ```julia
 julia> ca = ComponentArray(a=5, b=[4, 1], c=(a=2, b=[6, 30.0]))
@@ -118,7 +118,7 @@ julia> @btime sum(x.a + x.b for x in $ca.c.a);
 - Easier DifferentialEquations plotting!
     - Automatic legend labeling!
     - `Symbol` and `String` support for the `vars` plot keyword!
-    - See it in an action [here](https://github.com/jonniedie/ComponentArrays.jl/blob/master/docs/src/examples/adaptive_control.md)!
+    - See it in an action [here](https://github.com/SciML/ComponentArrays.jl/blob/main/docs/src/examples/adaptive_control.md)!
 
 ### v0.5.0
 - Constructor for making new `ComponentVector`s with additional fields! Watch out, it's slow!
@@ -131,7 +131,7 @@ ComponentVector{Int64}(a = 5, b = [1, 2], c = [0 0; 0 0], d = (a = 2, b = 10))
 ```
 
 ### v0.4.0
-- Zygote rules for DiffEqFlux support! Check out [the docs](https://jonniedie.github.io/ComponentArrays.jl/dev/examples/DiffEqFlux/) for an example!
+- Zygote rules for DiffEqFlux support! Check out [the docs](https://sciml.github.io/ComponentArrays.jl/dev/examples/DiffEqFlux/) for an example!
 
 ### v0.3.0
 - Matrix and higher-dimensional array components!

@@ -1,10 +1,14 @@
-using Documenter, ComponentArrays
+using ComponentArrays
+using Documenter
+using Documenter.Remotes: GitHub
+
+DocMeta.setdocmeta!(ComponentArrays, :DocTestSetup, :(using ComponentArrays))
 
 makedocs(;
     modules=[ComponentArrays],
     format=Documenter.HTML(
-        canonical="https://jonniedie.github.io/ComponentArrays.jl/stable",
-        ),
+        canonical="https://sciml.github.io/ComponentArrays.jl/stable",
+    ),
     pages=[
         "Home" => "index.md",
         "Quick Start" => "quickstart.md",
@@ -17,11 +21,11 @@ makedocs(;
         ],
         "API" => "api.md",
     ],
-    repo="https://github.com/jonniedie/ComponentArrays.jl/blob/{commit}{path}#L{line}",
+    repo=GitHub("SciML/ComponentArrays.jl"),
     sitename="ComponentArrays.jl",
     authors="Jonnie Diegelman",
 )
 
 deploydocs(;
-    repo="github.com/jonniedie/ComponentArrays.jl.git",
+    repo="github.com/SciML/ComponentArrays.jl.git",
 )

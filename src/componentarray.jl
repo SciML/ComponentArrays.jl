@@ -327,17 +327,17 @@ directly on an `AbstractAxis`.
 
 # Examples
 
-```julia-repl
+```jldoctest
 julia> using ComponentArrays
 
 julia> ca = ComponentArray(a=1, b=[1,2,3], c=(a=4,))
 ComponentVector{Int64}(a = 1, b = [1, 2, 3], c = (a = 4))
 
 julia> [ca[k] for k in valkeys(ca)]
-3-element Array{Any,1}:
+3-element Vector{Any}:
  1
   [1, 2, 3]
-  ComponentVector{Int64,SubArray...}(a = 4)
+  ComponentVector{Int64}(a = 4)
 
 julia> sum(prod(ca[k]) for k in valkeys(ca))
 11
