@@ -140,8 +140,11 @@ const NotShapedOrPartitionedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis} where
 
 Base.merge(axs::Vararg{Axis}) = Axis(merge(indexmap.(axs)...))
 
+# TODO: broken for FlatAxis
 Base.firstindex(ax::AbstractAxis) = first(viewindex(first(indexmap(ax))))
 Base.lastindex(ax::AbstractAxis) = last(viewindex(last(indexmap(ax))))
+Base.length(ax::AbstractAxis) = lastindex(ax) - firstindex(ax) + 1
+Base.length(ax::NullorFlatAxis) = error("NullorFlatAxis has no length")
 
 Base.keys(ax::AbstractAxis) = keys(indexmap(ax))
 
