@@ -14,6 +14,8 @@ Base.show(io::IO, ::PartitionedAxis{PartSz, IdxMap, Ax}) where {PartSz, IdxMap, 
 
 Base.show(io::IO, ::ShapedAxis{Shape}) where {Shape} =
     print(io, "ShapedAxis($Shape)")
+Base.show(io::IO, ::Shaped1DAxis{Shape}) where {Shape} =
+    print(io, "Shaped1DAxis($Shape)")
 
 Base.show(io::IO, ::MIME"text/plain", ::ViewAxis{Inds, IdxMap, Ax}) where {Inds, IdxMap, Ax} =
     print(io, "ViewAxis($Inds, $(Ax()))")

@@ -17,7 +17,7 @@ export fastindices # Deprecated
 include("lazyarray.jl")
 
 include("axis.jl")
-export AbstractAxis, Axis, PartitionedAxis, ShapedAxis, ViewAxis, FlatAxis
+export AbstractAxis, Axis, PartitionedAxis, ShapedAxis, Shaped1DAxis, ViewAxis, FlatAxis
 
 include("componentarray.jl")
 export ComponentArray, ComponentVector, ComponentMatrix, getaxes, getdata, valkeys

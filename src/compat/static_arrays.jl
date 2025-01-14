@@ -4,6 +4,7 @@ end
 
 _maybe_SArray(x::SubArray, ::Val{N}, ::FlatAxis) where {N} = SVector{N}(x)
 _maybe_SArray(x::Base.ReshapedArray, ::Val, ::ShapedAxis{Sz}) where {Sz} = SArray{Tuple{Sz...}}(x)
+_maybe_SArray(x, ::Val, ::Shaped1DAxis{Sz}) where {Sz} = SArray{Tuple{Sz...}}(x)
 _maybe_SArray(x, vals...) = x
 
 @generated function static_getproperty(ca::ComponentVector, ::Val{s}) where {s}

@@ -3,6 +3,8 @@ struct ComponentIndex{Idx, Ax<:AbstractAxis}
     ax::Ax
 end
 ComponentIndex(idx) = ComponentIndex(idx, FlatAxis())
+ComponentIndex(idx::CartesianIndex) = ComponentIndex(idx, ShapedAxis((1,)))
+ComponentIndex(idx::AbstractArray{<:Integer}) = ComponentIndex(idx, ShapedAxis(size(idx)))
 ComponentIndex(idx::Int) = ComponentIndex(idx, NullAxis())
 ComponentIndex(vax::ViewAxis{Inds,IdxMap,Ax}) where {Inds,IdxMap,Ax} = ComponentIndex(Inds, vax.ax)
 

@@ -47,7 +47,8 @@ ComponentArray{T}(::UndefInitializer, ax::Axes) where {T,Axes<:Tuple} =
 
 # Entry from data array and AbstractAxis types dispatches to correct shapes and partitions
 # then packs up axes into a tuple for inner constructor
-ComponentArray(data, ::FlatAxis...) = data
+# ComponentArray(data, ::FlatAxis...) = data
+ComponentArray(data, ::Union{FlatAxis,Shaped1DAxis}...) = data
 ComponentArray(data, ax::NotShapedOrPartitionedAxis...) = ComponentArray(data, ax)
 ComponentArray(data, ax::NotPartitionedAxis...) = ComponentArray(maybe_reshape(data, ax...), unshape.(ax)...)
 function ComponentArray(data, ax::AbstractAxis...)
@@ -179,6 +180,10 @@ function make_idx(data, nt::Union{NamedTuple, AbstractDict}, last_val)
     )...)
     return (data, ViewAxis(last_index(last_val) .+ (1:len), kvs))
 end
+function make_idx(data, nt::NamedTuple{(), Tuple{}}, last_val)
+    out = last_index(last_val) .+ (1:length(nt))
+    return (data, ViewAxis(out, ShapedAxis((length(nt),))))
+end
 function make_idx(data, pair::Pair, last_val)
     data, ax = make_idx(data, pair.second, last_val)
     len = recursive_length(data)
@@ -245,7 +250,7 @@ end
 # Reshape ComponentArrays with ShapedAxis axes
 maybe_reshape(data, ::NotShapedOrPartitionedAxis...) = data
 function maybe_reshape(data, axs::AbstractAxis...)
-    shapes = filter_by_type(ShapedAxis, axs...) .|> size
+    shapes = filter_by_type(Union{ShapedAxis,Shaped1DAxis}, axs...) .|> size
     shapes = reduce((tup, s) -> (tup..., s...), shapes)
     return reshape(data, shapes)
 end

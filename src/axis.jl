@@ -66,14 +66,22 @@ example)
 """
 struct ShapedAxis{Shape} <: AbstractAxis{nothing} end
 @inline ShapedAxis(Shape) = ShapedAxis{Shape}()
-ShapedAxis(::Tuple{<:Int}) = FlatAxis()
+# ShapedAxis(::Tuple{<:Int}) = FlatAxis()
+Base.length(::ShapedAxis{Shape}) where{Shape} = prod(Shape)
+
+struct Shaped1DAxis{Shape} <: AbstractAxis{nothing} end
+ShapedAxis(shape::Tuple{<:Int}) = Shaped1DAxis{shape}()
+Shaped1DAxis(shape::Tuple{<:Int}) = Shaped1DAxis{shape}()
+Base.length(::Shaped1DAxis{Shape}) where {Shape} = only(Shape)
 
 const Shape = ShapedAxis
 
 unshape(ax) = ax
 unshape(ax::ShapedAxis) = Axis(indexmap(ax))
+unshape(ax::Shaped1DAxis) = Axis(indexmap(ax))
 
 Base.size(::ShapedAxis{Shape}) where {Shape} = Shape
+Base.size(::Shaped1DAxis{Shape}) where {Shape} = Shape
 
 
 
@@ -133,9 +141,9 @@ Axis(::Number) = NullAxis()
 Axis(::NamedTuple{()}) = FlatAxis()
 Axis(x) = FlatAxis()
 
-const NotShapedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis} where {IdxMap}
-const NotPartitionedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis, ShapedAxis{Shape}} where {Shape, IdxMap}
-const NotShapedOrPartitionedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis} where {IdxMap}
+const NotShapedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis, Shaped1DAxis} where {IdxMap}
+const NotPartitionedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis, ShapedAxis{Shape}, Shaped1DAxis} where {Shape, IdxMap}
+const NotShapedOrPartitionedAxis = Union{Axis{IdxMap}, FlatAxis, Shaped1DAxis} where {IdxMap}
 
 
 Base.merge(axs::Vararg{Axis}) = Axis(merge(indexmap.(axs)...))
@@ -149,6 +157,10 @@ reindex(i, offset) = i .+ offset
 reindex(ax::FlatAxis, _) = ax
 reindex(ax::Axis, offset) = Axis(map(x->reindex(x, offset), indexmap(ax)))
 reindex(ax::ViewAxis, offset) = ViewAxis(viewindex(ax) .+ offset, indexmap(ax))
+function reindex(ax::ViewAxis{OldInds,IdxMap,Ax}, offset) where {OldInds,IdxMap,Ax<:Shaped1DAxis} 
+    NewInds = viewindex(ax) .+ offset
+    return ViewAxis(NewInds, Ax())
+end
 
 # Get AbstractAxis index
 @inline Base.getindex(::AbstractAxis, idx) = ComponentIndex(idx)
@@ -175,6 +187,7 @@ end
 
 _maybe_view_axis(inds, ax::AbstractAxis) = ViewAxis(inds, ax)
 _maybe_view_axis(inds, ::NullAxis) = inds[1]
+_maybe_view_axis(inds, ax::Union{ShapedAxis,Shaped1DAxis}) = ViewAxis(inds, ax)
 
 struct CombinedAxis{C,A} <: AbstractUnitRange{Int}
     component_axis::C
@@ -188,6 +201,7 @@ _component_axis(ax) = FlatAxis()
 
 _array_axis(ax::CombinedAxis) = ax.array_axis
 _array_axis(ax) = ax
+_array_axis(ax::Int) = Shaped1DAxis((ax,))
 
 Base.first(ax::CombinedAxis) = first(_array_axis(ax))
 
