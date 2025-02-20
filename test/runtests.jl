@@ -290,10 +290,9 @@ end
     @test ca[Not(2:3)] == getdata(ca)[Not(2:3)]
 
     # Issue #123
-    # We had to revert this because there is no way to work around
-    # OffsetArrays' type piracy without introducing type piracy
-    # ourselves because `() isa Tuple{N, <:CombinedAxis} where {N}`
-    # @test reshape(a, axes(ca)...) isa Vector{Float64}
+    @test reshape(a, axes(ca)...) isa Vector{Float64}
+    @teset reshape(ca, axes(ca)) === ca
+    @teset reshape(ca, axes(ca)...) === ca
 
     # Issue #248: Indexing ComponentMatrix with FlatAxis components
     @test cmat3[:a, :a] == cmat3check[1, 1]
@@ -305,8 +304,6 @@ end
     @test cmat3[:c, :a] == reshape(cmat3check[6:11, 1], 3, 2)
     @test cmat3[:c, :b] == reshape(cmat3check[6:11, 2:5], 3, 2, 4)
     @test cmat3[:c, :c] == reshape(cmat3check[6:11, 6:11], 3, 2, 3, 2)
-
-    @test_broken reshape(a, axes(ca)...) isa Vector{Float64}
 
     # Issue #265: Multi-symbol indexing with matrix components
     @test ca2.c[[:a, :b]].b isa AbstractMatrix
