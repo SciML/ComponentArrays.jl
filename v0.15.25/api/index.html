@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>API · ComponentArrays.jl</title><meta name="title" content="API · ComponentArrays.jl"/><meta property="og:title" content="API · ComponentArrays.jl"/><meta property="twitter:title" content="API · ComponentArrays.jl"/><meta name="description" content="Documentation for ComponentArrays.jl."/><meta property="og:description" content="Documentation for ComponentArrays.jl."/><meta property="twitter:description" content="Documentation for ComponentArrays.jl."/><meta property="og:url" content="https://sciml.github.io/ComponentArrays.jl/stable/api/"/><meta property="twitter:url" content="https://sciml.github.io/ComponentArrays.jl/stable/api/"/><link rel="canonical" href="https://sciml.github.io/ComponentArrays.jl/stable/api/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">ComponentArrays.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../quickstart/">Quick Start</a></li><li><a class="tocitem" href="../indexing_behavior/">Indexing Behavior</a></li><li><a class="tocitem" href="../static_unpack/">Unpacking to StaticArrays</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/DiffEqFlux/">Neural ODEs with DiffEqFlux</a></li><li><a class="tocitem" href="../examples/adaptive_control/">Model Reference Adaptive Control</a></li><li><a class="tocitem" href="../examples/ODE_jac/">ODE with Jacobian</a></li></ul></li><li class="is-active"><a class="tocitem" href>API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>API</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>API</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl/blob/main/docs/src/api.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="API"><a class="docs-heading-anchor" href="#API">API</a><a id="API-1"></a><a class="docs-heading-anchor-permalink" href="#API" title="Permalink"></a></h1><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.Axis" href="#ComponentArrays.Axis"><code>ComponentArrays.Axis</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ax = Axis(nt::NamedTuple)</code></pre><p>Gives named component access for <code>ComponentArray</code>s.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using ComponentArrays
+
+julia&gt; ax = Axis((a = 1, b = ViewAxis(2:7, PartitionedAxis(2, (a = 1, b = 2))), c = ViewAxis(8:10, (a = 1, b = 2:3))));
+
+julia&gt; A = [100, 4, 1.3, 1, 1, 4.4, 0.4, 2, 1, 45];
+
+julia&gt; ca = ComponentArray(A, ax)
+ComponentVector{Float64}(a = 100.0, b = ComponentVector{Float64, SubArray{Float64, 1, Vector{Float64}, Tuple{UnitRange{Int64}}, true}, Tuple{Axis{(a = 1, b = 2)}}}[(a = 4.0, b = 1.3), (a = 1.0, b = 1.0), (a = 4.4, b = 0.4)], c = (a = 2.0, b = [1.0, 45.0]))
+
+julia&gt; ca.a
+100.0
+
+julia&gt; ca.b
+3-element LazyArray{ComponentVector{Float64, SubArray{Float64, 1, Vector{Float64}, Tuple{UnitRange{Int64}}, true}, Tuple{Axis{(a = 1, b = 2)}}}}:
+ ComponentVector{Float64,SubArray...}(a = 4.0, b = 1.3)
+ ComponentVector{Float64,SubArray...}(a = 1.0, b = 1.0)
+ ComponentVector{Float64,SubArray...}(a = 4.4, b = 0.4)
+
+julia&gt; ca.c
+ComponentVector{Float64,SubArray...}(a = 2.0, b = [1.0, 45.0])
+
+julia&gt; ca.c.b
+2-element view(::Vector{Float64}, 9:10) with eltype Float64:
+  1.0
+ 45.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/axis.jl#L14-L47">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.ComponentArray" href="#ComponentArrays.ComponentArray"><code>ComponentArrays.ComponentArray</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">x = ComponentArray(nt::NamedTuple)
+x = ComponentArray(;kwargs...)
+x = ComponentArray(data::AbstractVector, ax)
+x = ComponentArray{T}(args...; kwargs...) where T</code></pre><p>Array type that can be accessed like an arbitrary nested mutable struct.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using ComponentArrays
+
+julia&gt; x = ComponentArray(a=1, b=[2, 1, 4], c=(a=2, b=[1, 2]))
+ComponentVector{Int64}(a = 1, b = [2, 1, 4], c = (a = 2, b = [1, 2]))
+
+julia&gt; x.c.a = 400; x
+ComponentVector{Int64}(a = 1, b = [2, 1, 4], c = (a = 400, b = [1, 2]))
+
+julia&gt; x[5]
+400
+
+julia&gt; collect(x)
+7-element Vector{Int64}:
+   1
+   2
+   1
+   4
+ 400
+   1
+   2</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L1-L33">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.ComponentMatrix" href="#ComponentArrays.ComponentMatrix"><code>ComponentArrays.ComponentMatrix</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">x = ComponentMatrix(data::AbstractMatrix, ax...)
+x = ComponentMatrix{T}(data::AbstractMatrix, ax...) where T</code></pre><p>A <code>ComponentMatrix</code> is an alias for a two-dimensional <code>ComponentArray</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L115-L120">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.ComponentVector" href="#ComponentArrays.ComponentVector"><code>ComponentArrays.ComponentVector</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">x = ComponentVector(nt::NamedTuple)
+x = ComponentVector(;kwargs...)
+x = ComponentVector(data::AbstractVector, ax)
+x = ComponentVector{T}(args...; kwargs...) where T</code></pre><p>A <code>ComponentVector</code> is an alias for a one-dimensional <code>ComponentArray</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L87-L94">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.KeepIndex" href="#ComponentArrays.KeepIndex"><code>ComponentArrays.KeepIndex</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">KeepIndex(idx)</code></pre><p>Tag an index of a <code>ComponentArray</code> to retain it&#39;s <code>Axis</code> through indexing</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentindex.jl#L19-L23">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.LazyArray" href="#ComponentArrays.LazyArray"><code>ComponentArrays.LazyArray</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">LazyArray(gen::Base.Generator)</code></pre><p>Wrapper around Base.Generator that also indexes like an array. This is needed to make ComponentArrays that hold arrays of ComponentArrays</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/lazyarray.jl#L1-L6">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.PartitionedAxis" href="#ComponentArrays.PartitionedAxis"><code>ComponentArrays.PartitionedAxis</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">pa = PartitionedAxis(partition_size, index_map)</code></pre><p>Axis for creating arrays of <code>ComponentArray</code>s</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/axis.jl#L88-L92">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.ShapedAxis" href="#ComponentArrays.ShapedAxis"><code>ComponentArrays.ShapedAxis</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">sa = ShapedAxis(shape)</code></pre><p>Preserves higher-dimensional array components in <code>ComponentArray</code>s (matrix components, for example)</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/axis.jl#L61-L66">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.ViewAxis" href="#ComponentArrays.ViewAxis"><code>ComponentArrays.ViewAxis</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">va = ViewAxis(parent_index, index_map)</code></pre><p>Axis for creating arrays of <code>ComponentArray</code>s</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/axis.jl#L110-L114">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.getaxes-Tuple{ComponentArray}" href="#ComponentArrays.getaxes-Tuple{ComponentArray}"><code>ComponentArrays.getaxes</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">getaxes(x::ComponentArray)</code></pre><p>Access <code>.axes</code> field of a <code>ComponentArray</code>. This is different than <code>axes(x::ComponentArray)</code>, which     returns the axes of the contained array.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using ComponentArrays
+
+julia&gt; ax = Axis(a=1:3, b=(4:6, (a=1, b=2:3)))
+Axis(a = 1:3, b = (4:6, (a = 1, b = 2:3)))
+
+julia&gt; A = zeros(6,6);
+
+julia&gt; ca = ComponentArray(A, (ax, ax))
+6×6 ComponentMatrix{Float64} with axes Axis(a = 1:3, b = (4:6, (a = 1, b = 2:3))) × Axis(a = 1:3, b = (4:6, (a = 1, b = 2:3)))
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+
+julia&gt; getaxes(ca)
+(Axis(a = 1:3, b = (4:6, (a = 1, b = 2:3))), Axis(a = 1:3, b = (4:6, (a = 1, b = 2:3))))</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L289-L317">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.getdata-Tuple{ComponentArray}" href="#ComponentArrays.getdata-Tuple{ComponentArray}"><code>ComponentArrays.getdata</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">getdata(x::ComponentArray)</code></pre><p>Access <code>.data</code> field of a <code>ComponentArray</code>, which contains the array that <code>ComponentArray</code> wraps.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L279-L283">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.label2index-Tuple{ComponentVector, Any}" href="#ComponentArrays.label2index-Tuple{ComponentVector, Any}"><code>ComponentArrays.label2index</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">label2index(x::ComponentVector, str::AbstractString)
+label2index(label_array, str::AbstractString)</code></pre><p>Convert labels made by <code>labels</code> function to an array of flat indices of a <code>ComponentVector</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; x = ComponentArray(a=5, b=[(a=(a=20,b=1), b=0), (a=(a=33,b=1), b=0)], c=(a=(a=2, b=[1,2]), b=[1. 2.; 5 6]))
+ComponentVector{Float64}(a = 5.0, b = ComponentVector{Float64, SubArray{Float64, 1, Vector{Float64}, Tuple{UnitRange{Int64}}, true}, Tuple{Axis{(a = ViewAxis(1:2, Axis(a = 1, b = 2)), b = 3)}}}[(a = (a = 20.0, b = 1.0), b = 0.0), (a = (a = 33.0, b = 1.0), b = 0.0)], c = (a = (a = 2.0, b = [1.0, 2.0]), b = [1.0 2.0; 5.0 6.0]))
+
+julia&gt; ComponentArrays.labels(x)
+14-element Vector{String}:
+ &quot;a&quot;
+ &quot;b[1].a.a&quot;
+ &quot;b[1].a.b&quot;
+ &quot;b[1].b&quot;
+ &quot;b[2].a.a&quot;
+ &quot;b[2].a.b&quot;
+ &quot;b[2].b&quot;
+ &quot;c.a.a&quot;
+ &quot;c.a.b[1]&quot;
+ &quot;c.a.b[2]&quot;
+ &quot;c.b[1,1]&quot;
+ &quot;c.b[2,1]&quot;
+ &quot;c.b[1,2]&quot;
+ &quot;c.b[2,2]&quot;
+
+julia&gt; ComponentArrays.label2index(x, &quot;c.a&quot;)
+3-element Vector{Int64}:
+  8
+  9
+ 10
+
+julia&gt; ComponentArrays.label2index(x, &quot;b[1]&quot;)
+3-element Vector{Int64}:
+ 2
+ 3
+ 4</code></pre><p>see also <a href="#ComponentArrays.labels-Tuple{ComponentVector}"><code>labels</code></a></p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/plot_utils.jl#L42-L84">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.labels-Tuple{ComponentVector}" href="#ComponentArrays.labels-Tuple{ComponentVector}"><code>ComponentArrays.labels</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">labels(x::ComponentVector)</code></pre><p>Get string labels for for each index of a <code>ComponentVector</code>. Useful for automatic plot legend labelling.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; x = ComponentArray(a=5, b=[(a=(a=20,b=1), b=0), (a=(a=33,b=1), b=0)], c=(a=(a=2, b=[1,2]), b=[1. 2.; 5 6]))
+ComponentVector{Float64}(a = 5.0, b = ComponentVector{Float64, SubArray{Float64, 1, Vector{Float64}, Tuple{UnitRange{Int64}}, true}, Tuple{Axis{(a = ViewAxis(1:2, Axis(a = 1, b = 2)), b = 3)}}}[(a = (a = 20.0, b = 1.0), b = 0.0), (a = (a = 33.0, b = 1.0), b = 0.0)], c = (a = (a = 2.0, b = [1.0, 2.0]), b = [1.0 2.0; 5.0 6.0]))
+
+julia&gt; ComponentArrays.labels(x)
+14-element Vector{String}:
+ &quot;a&quot;
+ &quot;b[1].a.a&quot;
+ &quot;b[1].a.b&quot;
+ &quot;b[1].b&quot;
+ &quot;b[2].a.a&quot;
+ &quot;b[2].a.b&quot;
+ &quot;b[2].b&quot;
+ &quot;c.a.a&quot;
+ &quot;c.a.b[1]&quot;
+ &quot;c.a.b[2]&quot;
+ &quot;c.b[1,1]&quot;
+ &quot;c.b[2,1]&quot;
+ &quot;c.b[1,2]&quot;
+ &quot;c.b[2,2]&quot;</code></pre><p>see also <a href="#ComponentArrays.label2index-Tuple{ComponentVector, Any}"><code>label2index</code></a></p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/plot_utils.jl#L2-L30">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ComponentArrays.valkeys-Tuple{AbstractAxis}" href="#ComponentArrays.valkeys-Tuple{AbstractAxis}"><code>ComponentArrays.valkeys</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">valkeys(x::ComponentVector)
+valkeys(x::AbstractAxis)</code></pre><p>Returns <code>Val</code>-wrapped keys of <code>ComponentVector</code> for fast iteration over component keys. Also works directly on an <code>AbstractAxis</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using ComponentArrays
+
+julia&gt; ca = ComponentArray(a=1, b=[1,2,3], c=(a=4,))
+ComponentVector{Int64}(a = 1, b = [1, 2, 3], c = (a = 4))
+
+julia&gt; [ca[k] for k in valkeys(ca)]
+3-element Vector{Any}:
+ 1
+  [1, 2, 3]
+  ComponentVector{Int64}(a = 4)
+
+julia&gt; sum(prod(ca[k]) for k in valkeys(ca))
+11</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciML/ComponentArrays.jl/blob/ee481b43da646ce9b9f78358f47ce381f462543f/src/componentarray.jl#L332-L356">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/ODE_jac/">« ODE with Jacobian</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.1 on <span class="colophon-date" title="Saturday 1 March 2025 15:19">Saturday 1 March 2025</span>. Using Julia version 1.10.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
