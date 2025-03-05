@@ -1,4 +1,4 @@
-# Show AbstractAxis types
+# Show AbstractAxis instances
 Base.show(io::IO, ::MIME"text/plain", ::Axis{IdxMap}) where IdxMap = print(io, "Axis$IdxMap")
 Base.show(io::IO, ::Axis{IdxMap}) where IdxMap = print(io, "Axis$IdxMap")
 
@@ -24,7 +24,19 @@ Base.show(io::IO, ::ViewAxis{Inds, IdxMap, <:Ax}) where {Inds, IdxMap, Ax} =
 Base.show(io::IO, ::ViewAxis{Inds, IdxMap, <:NullorFlatAxis}) where {Inds, IdxMap} =
     print(io, Inds)
 
+# Show reducted Axis types to avoid excessive stacktraces
+Base.show(io::IO, ::Type{Axis{IdxMap}}) where {IdxMap} = print(io, "Axis{...}")
+Base.show(io::IO, ::Type{FlatAxis}) = print(io, "FlatAxis")
+Base.show(io::IO, ::Type{NullAxis}) = print(io, "NullAxis")
+function Base.show(io::IO, ::Type{PartitionedAxis{PartSz,IdxMap,Ax}}) where {PartSz,IdxMap,Ax}
+    return print(io, "PartitionedAxis{$PartSz, {...}, $Ax}")
+end
+Base.show(io::IO, ::Type{ShapedAxis{Shape,IdxMap}}) where {Shape,IdxMap} = print(io, "ShapedAxis($Shape, {...})")
+Base.show(io::IO, ::Type{ViewAxis{Inds,IdxMap,Ax}}) where {Inds,IdxMap,Ax} = print(io, "ViewAxis{$Inds, {...}, $Ax)")
+
 Base.show(io::IO, ci::ComponentIndex) = print(io, "ComponentIndex($(ci.idx), $(ci.ax))")
+
+
 
 
 # Show ComponentArrays
