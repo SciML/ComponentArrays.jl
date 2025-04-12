@@ -14,7 +14,7 @@ using Test
 
     # Test 2: Structure preservation
     @test typeof(result) == typeof(default)
-    @test getfield(result, :axes) == getfield(default, :axes)
+    @test getaxes(result) == getaxes(default)
 
     # Test 3: Deep nested update
     deep_default = ComponentArray(
@@ -50,5 +50,5 @@ using Test
     @test result_nonexist.sig.sigma ≈ 2.0
     @test !hasproperty(result_nonexist, :nonexistent)
     @test typeof(result_nonexist) == typeof(default)
-    @test getfield(result_nonexist, :axes) == getfield(default, :axes)
+    @test getaxes(result_nonexist) == getaxes(default)
 end
