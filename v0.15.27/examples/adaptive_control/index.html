@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Model Reference Adaptive Control · ComponentArrays.jl</title><meta name="title" content="Model Reference Adaptive Control · ComponentArrays.jl"/><meta property="og:title" content="Model Reference Adaptive Control · ComponentArrays.jl"/><meta property="twitter:title" content="Model Reference Adaptive Control · ComponentArrays.jl"/><meta name="description" content="Documentation for ComponentArrays.jl."/><meta property="og:description" content="Documentation for ComponentArrays.jl."/><meta property="twitter:description" content="Documentation for ComponentArrays.jl."/><meta property="og:url" content="https://sciml.github.io/ComponentArrays.jl/stable/examples/adaptive_control/"/><meta property="twitter:url" content="https://sciml.github.io/ComponentArrays.jl/stable/examples/adaptive_control/"/><link rel="canonical" href="https://sciml.github.io/ComponentArrays.jl/stable/examples/adaptive_control/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ComponentArrays.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../quickstart/">Quick Start</a></li><li><a class="tocitem" href="../../indexing_behavior/">Indexing Behavior</a></li><li><a class="tocitem" href="../../static_unpack/">Unpacking to StaticArrays</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../DiffEqFlux/">Neural ODEs with DiffEqFlux</a></li><li class="is-active"><a class="tocitem" href>Model Reference Adaptive Control</a><ul class="internal"><li><a class="tocitem" href="#Motivation"><span>Motivation</span></a></li><li><a class="tocitem" href="#Helper-Functions"><span>Helper Functions</span></a></li><li><a class="tocitem" href="#Laplace-Domain-Model-Specification"><span>Laplace Domain Model Specification</span></a></li><li><a class="tocitem" href="#Derivative-Functions"><span>Derivative Functions</span></a></li><li><a class="tocitem" href="#Simulation-Inputs"><span>Simulation Inputs</span></a></li><li><a class="tocitem" href="#Set-Up-Simulation"><span>Set Up Simulation</span></a></li><li><a class="tocitem" href="#Unmodeled-Dynamics"><span>Unmodeled Dynamics</span></a></li><li><a class="tocitem" href="#Insufficient-Excitation-and-Rohr&#39;s-Example"><span>Insufficient Excitation and Rohr&#39;s Example</span></a></li></ul></li><li><a class="tocitem" href="../ODE_jac/">ODE with Jacobian</a></li></ul></li><li><a class="tocitem" href="../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Model Reference Adaptive Control</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Model Reference Adaptive Control</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl/blob/main/docs/src/examples/adaptive_control.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Model-Reference-Adaptive-Control"><a class="docs-heading-anchor" href="#Model-Reference-Adaptive-Control">Model Reference Adaptive Control</a><a id="Model-Reference-Adaptive-Control-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Reference-Adaptive-Control" title="Permalink"></a></h1><h2 id="Motivation"><a class="docs-heading-anchor" href="#Motivation">Motivation</a><a id="Motivation-1"></a><a class="docs-heading-anchor-permalink" href="#Motivation" title="Permalink"></a></h2><p>Adaptive control is a good example of the type of problem that would be difficult to handle in a differential equations library without some sort of component system. We&#39;ll see how easy <code>ComponentArray</code>s make it to swap out subsystems, even when they have a different number of internal states.</p><p>This specific example will walk through a typical adaptive control problem with online parameter estimation. For offline parameter estimation, check out the <a href="https://docs.sciml.ai/stable/analysis/parameter_estimation/">DifferentialEquations.jl docs</a>.</p><pre><code class="language-julia hljs">using ComponentArrays
+using ControlSystems
+using DifferentialEquations
+using UnPack
+using Plots</code></pre><h2 id="Helper-Functions"><a class="docs-heading-anchor" href="#Helper-Functions">Helper Functions</a><a id="Helper-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Helper-Functions" title="Permalink"></a></h2><p>These helper functions will eventually make it into a separate package aimed at simulating control systems problems. The idea is to make it easier to bring linear models from <a href="https://github.com/JuliaControl/ControlSystems.jl">ControlSystems.jl</a> into nonlinear simulations in <a href="https://github.com/SciML/DifferentialEquations.jl">DifferentialEquations.jl</a>. For now, we&#39;ll just define everything we need here.</p><p>First, we need a way to apply inputs to the system through keyword arguments. These will help us pass in inputs as either values or functions of (x,p,t).</p><pre><code class="language-julia hljs">maybe_apply(f::Function, x, p, t) = f(x, p, t)
+maybe_apply(f, x, p, t) = f
+
+function apply_inputs(func; kwargs...)
+    simfun(dx, x, p, t) = func(dx, x, p, t; map(f-&gt;maybe_apply(f, x, p, t), (;kwargs...))...)
+    simfun(x, p, t) = func(x, p, t; map(f-&gt;maybe_apply(f, x, p, t), (;kwargs...))...)
+    return simfun
+end
+</code></pre><p>Next, we need a way to create derivative functions from transfer functions. In ControlSystems.jl there is a function called <code>simulator</code> that does this, but the inputs must be applied from the start so we couldn&#39;t use it as a component function. Our version allows inputs to be passed through the keyword arguments and, as an added convenience, is in a transposed observer canonical form so our first element of <code>x</code> is also the output <code>y</code> (note that while this is true for our problem, it isn&#39;t always going to be the case).</p><pre><code class="language-julia hljs">SISO_simulator(P::TransferFunction) = SISO_simulator(ss(P))
+function SISO_simulator(P::AbstractStateSpace)
+    @unpack A, B, C, D = P
+
+    if size(D)!=(1,1)
+        error(&quot;This is not a SISO system&quot;)
+    end
+
+    # Put into transposed observer canonical form so the first element is also the y value
+    BB = reverse(vec(C))
+    CC = reverse(vec(B))&#39;
+    DD = D[1,1]
+    
+    return function sim!(dx, x, p, t; u=0.0)
+        dx .= A*x + BB*u
+        return CC*x + DD*u
+    end
+end</code></pre><h2 id="Laplace-Domain-Model-Specification"><a class="docs-heading-anchor" href="#Laplace-Domain-Model-Specification">Laplace Domain Model Specification</a><a id="Laplace-Domain-Model-Specification-1"></a><a class="docs-heading-anchor-permalink" href="#Laplace-Domain-Model-Specification" title="Permalink"></a></h2><p>Using ControlSystems.jl we&#39;ll make a Laplace variable <code>s</code>.</p><pre><code class="language-julia hljs">s = tf(&quot;s&quot;)</code></pre><p>We can build a reference model in the Laplace domain</p><pre><code class="language-julia hljs">am = 3
+bm = 3
+ref_model = bm / (s + am)
+ref_sim! = SISO_simulator(ref_model)</code></pre><p>and our plant model as well. The nominal plant model structure is what is known to our adaptation law.</p><pre><code class="language-julia hljs">ap = 1
+bp = 2
+nominal_plant = bp / (s + ap)
+nominal_sim! = SISO_simulator(nominal_plant)</code></pre><p>To test robustness to uncertainty, we&#39;ll also include unmodeled dynamics with an entirely different structure than our nominal plant model.</p><pre><code class="language-julia hljs">unmodeled_dynamics = 229/(s^2 + 30s + 229)
+truth_plant = nominal_plant * unmodeled_dynamics
+truth_sim! = SISO_simulator(truth_plant)</code></pre><p>Let&#39;s do a quick sanity check to make sure our nominal and truth plant dynamics are about the same. We&#39;ll use the <code>apply_inputs</code> function to plot a step response and a sine response.</p><pre><code class="language-julia hljs">step_p = plot(solve(ODEProblem(apply_inputs(truth_sim!; u=1), truth_ic, (0.0, 10.0))); vars=1, label=&quot;truth model&quot;)
+plot!(step_p, solve(ODEProblem(apply_inputs(nominal_sim!; u=1), nominal_ic, (0.0, 10.0))); vars=1, label=&quot;nominal model&quot;)
+
+u = (x,p,t) -&gt; sin(3t)
+sin_p = plot(solve(ODEProblem(apply_inputs(truth_sim!; u=u), truth_ic, (0.0, 10.0))); vars=1, label=&quot;truth model&quot;)
+plot!(sin_p, solve(ODEProblem(apply_inputs(nominal_sim!; u=u), nominal_ic, (0.0, 10.0))); vars=1, label=&quot;nominal model&quot;)
+
+plot(step_p, sin_p; layout=(2,1), size=(800, 800))</code></pre><p><img src="../../assets/adaptive_control/adaptive_control_plant.png" alt/></p><p>We&#39;ll make a first-order sensor as well so we can add noise to our measurement.</p><pre><code class="language-julia hljs">τ = 0.005
+sensor_plant = 1 / (τ*s + 1)
+sensor_sim! = SISO_simulator(sensor_plant)</code></pre><h2 id="Derivative-Functions"><a class="docs-heading-anchor" href="#Derivative-Functions">Derivative Functions</a><a id="Derivative-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Derivative-Functions" title="Permalink"></a></h2><p>Our control law assumes perfect knowledge of the parameters that are attached to the regressors (which are the reference input and the model output)</p><pre><code class="language-julia hljs">control(θ, w) = θ&#39;w</code></pre><p>We&#39;ll use a simple gradient descent adaptation law</p><pre><code class="language-julia hljs">function adapt!(Dθ, θ, γ, t; e, w)
+    Dθ .= -γ*e*w
+    return nothing
+end</code></pre><p>Our feedback loop takes in the reference model output <code>ym</code> and the input signal <code>r</code>, calculates the control signal <code>u</code>, feeds that into the plant model, calculates the reference tracking error <code>e</code>, and finally updates feeds the reference tracking error and it&#39;s corresponding regressor vector to the adaptation law.</p><pre><code class="language-julia hljs">function feedback_sys!(D, vars, p, t; ym, r, n)
+    @unpack parameter_estimates, plant_model, sensor = vars
+    γ = p.gamma
+    regressor = [r, plant_model[1]]
+
+    u = control(parameter_estimates, regressor)
+    yp = p.plant_fun(D.plant_model, plant_model, (), t; u=u)
+    ŷ = sensor_sim!(D.sensor, sensor, (), t; u=yp[1]) + n
+    e = ŷ .- ym
+    regressor[2] = ŷ
+    adapt!(D.parameter_estimates, parameter_estimates, γ, t; e=e, w=regressor)
+    return yp
+end</code></pre><p>Now the full system takes in an input signal <code>r</code>, feeds it through the reference model, and feeds the output of the reference model <code>ym</code> and the input signal to <code>feedback_sys</code>.</p><pre><code class="language-julia hljs">function system!(D, vars, p, t; r=0.0, n=0.0)
+    @unpack reference_model, feedback_loop = vars
+
+    ym = ref_sim!(D.reference_model, reference_model, (), t; u=r)
+    yp = feedback_sys!(D.feedback_loop, feedback_loop, p, t; ym=ym, r=r, n=n)
+    return yp
+end</code></pre><h2 id="Simulation-Inputs"><a class="docs-heading-anchor" href="#Simulation-Inputs">Simulation Inputs</a><a id="Simulation-Inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Simulation-Inputs" title="Permalink"></a></h2><pre><code class="language-julia hljs"># Simulation time span
+tspan = (0.0, 30.0)
+
+# Input signal
+input_signal = (x,p,t) -&gt; sin(3t)
+
+# Initial conditions
+ref_ic = zeros(1)
+nominal_ic = zeros(1)
+truth_ic = zeros(3)
+sensor_ic = zeros(1)
+θ_est_ic = ComponentArray(θr=0.0, θy=0.0)</code></pre><h2 id="Set-Up-Simulation"><a class="docs-heading-anchor" href="#Set-Up-Simulation">Set Up Simulation</a><a id="Set-Up-Simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Set-Up-Simulation" title="Permalink"></a></h2><pre><code class="language-julia hljs">function simulate(plant_fun, plant_ic;
+                tspan=tspan,
+                input_signal=input_signal,
+                adapt_gain=1.5,
+                noise_param=nothing,
+                deterministic_noise=0.0)
+
+    noise(D, vars, p, t) = (D.feedback_loop.sensor[1] = noise_param)
+
+    # Truth control parameters
+    θ_truth = (r=bm/bp, y=(ap-am)/bp)
+
+    # Initial conditions
+    ic = ComponentArray(
+        reference_model = ref_ic,
+        feedback_loop = (
+            parameter_estimates = θ_est_ic,
+            sensor = sensor_ic,
+            plant_model = plant_ic,
+        ),
+    )
+
+    # Model parameters
+    p = (
+        gamma = adapt_gain,
+        plant_fun = plant_fun,
+    )
+
+    sim_fun = apply_inputs(system!; r=input_signal, n=deterministic_noise)
+
+    # We can also choose whether we want to include random noise in our model by switching between an ODE
+    # and an SDE problem.
+    if noise_param === nothing
+        prob = ODEProblem(sim_fun, ic, tspan, p, max_iters=2000)
+    else
+        prob = SDEProblem(sim_fun, noise, ic, tspan, p, max_iters=2000)
+    end
+
+
+    ## Solve!
+    sol = solve(prob)
+
+
+    ## Plot
+    # Reference model tracking
+    top = plot(
+        sol,
+        vars=[&quot;reference_model[1]&quot;, &quot;feedback_loop.sensor&quot;],
+        legend=:right,
+        title=&quot;Reference Model Tracking&quot;,
+    )
+
+    # Parameter estimate tracking
+    bottom = plot(sol, vars=&quot;feedback_loop.parameter_estimates&quot;)
+    plot!(
+        bottom,
+        [tspan...], [θ_truth.r θ_truth.y; θ_truth.r θ_truth.y],
+        labels=[&quot;θr truth&quot; &quot;θy truth&quot;],
+        legend=:right,
+        title=&quot;Parameter Estimate Tracking&quot;,
+    )
+
+    # Combine both plots
+    plot(top, bottom, layout=(2,1), size=(800, 800))
+end</code></pre><p>And now let&#39;s run the simulation and plot.</p><pre><code class="language-julia hljs">simulate(nominal_sim!, nominal_ic; noise_param=0.2)</code></pre><p><img src="../../assets/adaptive_control/adaptive_control_nominal.png" alt/></p><h2 id="Unmodeled-Dynamics"><a class="docs-heading-anchor" href="#Unmodeled-Dynamics">Unmodeled Dynamics</a><a id="Unmodeled-Dynamics-1"></a><a class="docs-heading-anchor-permalink" href="#Unmodeled-Dynamics" title="Permalink"></a></h2><p>Notice our parameter estimates are converging to a slightly different number than the truth values. This is because we didn&#39;t take the sensor dynamics into account in our adaptation law. Thankfully we are pretty robust to this. Let&#39;s push it a little further though. Remember our truth plant model with the extra unmodelled dynamics? Let&#39;s plot that one up now. Notice how easy it <code>ComponentArray</code>s make it to switch out the two simulations, despite the fact that the two plant models have a different number of states. </p><pre><code class="language-julia hljs">simulate(truth_sim!, truth_ic; noise_param=0.2)</code></pre><p><img src="../../assets/adaptive_control/adaptive_control_truth.png" alt/></p><p>Even though our parameters aren&#39;t tracking what we think they should be, we are still tracking our reference model well. In real systems, there are always going to be unaccounted-for dynamics, so it&#39;s important that we are robust to that.</p><h2 id="Insufficient-Excitation-and-Rohr&#39;s-Example"><a class="docs-heading-anchor" href="#Insufficient-Excitation-and-Rohr&#39;s-Example">Insufficient Excitation and Rohr&#39;s Example</a><a id="Insufficient-Excitation-and-Rohr&#39;s-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Insufficient-Excitation-and-Rohr&#39;s-Example" title="Permalink"></a></h2><p>Readers familiar with adaptive control might have noticed that our plant model parameters weren&#39;t just arbitrarily chosen; they come from Rohr&#39;s well-known example of parameter drift for insufficient excitation. To see this in action, let&#39;s look at what happens when we feed our model a stationary input. We&#39;ll switch to the same purely deterministic noise model that Rohr used. The parameter adaptation gain is a best guess to match the original data.</p><pre><code class="language-julia hljs">simulate(nominal_sim!, nominal_ic;
+        input_signal = 2.0,
+        deterministic_noise = (x,p,t) -&gt; 0.5sin(16.1t),
+        noise_param = nothing,
+        tspan = (0.0, 100.0),
+        adapt_gain = 3.35)</code></pre><p><img src="../../assets/adaptive_control/adaptive_control_rohrs_nominal.png" alt/></p><p>Interesting. If we were just looking at the model reference tracking, it would seem that everything is okay. The parameters are drifting within a space that keeps the reference tracking error small. This is pretty typical for &quot;insufficiently excited&quot; systems, i.e. systems whose input is either flat or at frequencies that are attenuated by the plant dynamics. Now let&#39;s see what happens with our truth model.</p><pre><code class="language-julia hljs">simulate(truth_sim!, truth_ic;
+           input_signal = 2.0,
+           deterministic_noise = (x,p,t) -&gt; 0.5sin(16.1t),
+           noise_param = nothing,
+           tspan = (0.0, 72.9),
+           adapt_gain = 3.35)</code></pre><p><img src="../../assets/adaptive_control/adaptive_control_rohrs_truth.png" alt/></p><p>Yikes! It looks like that parameter drift can lead to system instability. We won&#39;t go into the strategies to mitigate this problem here, but if you&#39;re interested, check out Slotine and Li&#39;s <a href="https://books.google.com/books/about/Applied_Nonlinear_Control.html?id=cwpRAAAAMAAJ&amp;source=kp_book_description">Applied Nonlinear Control</a>.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../DiffEqFlux/">« Neural ODEs with DiffEqFlux</a><a class="docs-footer-nextpage" href="../ODE_jac/">ODE with Jacobian »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.2 on <span class="colophon-date" title="Saturday 3 May 2025 04:02">Saturday 3 May 2025</span>. Using Julia version 1.10.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
