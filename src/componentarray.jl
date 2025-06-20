@@ -262,8 +262,8 @@ function maybe_reshape(data, axs::AbstractAxis...)
     return reshape(data, shapes)
 end
 
-function Base.reshape(parent::AbstractArray, dims::ComponentArrays.CombinedAxis...)
-    reshape(parent, getfield.(dims, :array_axis))
+function Base.reshape(A::AbstractArray, axs::Tuple{CombinedAxis, Vararg{CombinedAxis}})
+    reshape(A, _array_axis.(axs))
 end
 
 # Recurse through nested ViewAxis types to find the last index

@@ -291,12 +291,6 @@ end
     @test ca[Not(3)] == getdata(ca)[Not(3)]
     @test ca[Not(2:3)] == getdata(ca)[Not(2:3)]
 
-    # Issue #123
-    # We had to revert this because there is no way to work around
-    # OffsetArrays' type piracy without introducing type piracy
-    # ourselves because `() isa Tuple{N, <:CombinedAxis} where {N}`
-    # @test reshape(a, axes(ca)...) isa Vector{Float64}
-
     # Issue #248: Indexing ComponentMatrix with FlatAxis components
     @test cmat3[:a, :a] == cmat3check[1, 1]
     @test cmat3[:a, :b] == cmat3check[1, 2:5]
@@ -310,7 +304,8 @@ end
 
     # https://discourse.julialang.org/t/no-method-error-reshape-when-solving-ode-with-componentarrays-jl/126342
     x = ComponentVector(x=1.0, y=0.0, z=0.0)
-    @test reshape(x, axes(x)...) isa ComponentVector
+    @test reshape(x, axes(x)...) === x
+    @test reshape(x, axes(x)) === x
     @test reshape(a, axes(ca)...) isa Vector{Float64}
 
     # Issue #265: Multi-symbol indexing with matrix components
@@ -729,6 +724,7 @@ end
     # Issue #193
     # Make sure we aren't doing type piracy on `reshape`
     @test ndims(dropdims(ones(1,1), dims=(1,2))) == 0
+    @test reshape([1]) == fill(1, ())
 
     if VERSION >= v"1.9"
         # `stack` was introduced in Julia 1.9
