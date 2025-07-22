@@ -955,3 +955,7 @@ end
 @testset "Reactant" begin
     include("reactant_tests.jl")
 end
+
+@testset "ComponentArrays" begin
+    include("update_tests.jl")
+end
