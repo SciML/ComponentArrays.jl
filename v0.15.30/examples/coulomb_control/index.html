@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Control of a sliding block · ComponentArrays.jl</title><meta name="title" content="Control of a sliding block · ComponentArrays.jl"/><meta property="og:title" content="Control of a sliding block · ComponentArrays.jl"/><meta property="twitter:title" content="Control of a sliding block · ComponentArrays.jl"/><meta name="description" content="Documentation for ComponentArrays.jl."/><meta property="og:description" content="Documentation for ComponentArrays.jl."/><meta property="twitter:description" content="Documentation for ComponentArrays.jl."/><meta property="og:url" content="https://sciml.github.io/ComponentArrays.jl/stable/examples/coulomb_control/"/><meta property="twitter:url" content="https://sciml.github.io/ComponentArrays.jl/stable/examples/coulomb_control/"/><link rel="canonical" href="https://sciml.github.io/ComponentArrays.jl/stable/examples/coulomb_control/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ComponentArrays.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../quickstart/">Quick Start</a></li><li><a class="tocitem" href="../../indexing_behavior/">Indexing Behavior</a></li><li><a class="tocitem" href="../../static_unpack/">Unpacking to StaticArrays</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../DiffEqFlux/">Neural ODEs with DiffEqFlux</a></li><li><a class="tocitem" href="../adaptive_control/">Model Reference Adaptive Control</a></li><li><a class="tocitem" href="../ODE_jac/">ODE with Jacobian</a></li></ul></li><li><a class="tocitem" href="../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Control of a sliding block</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Control of a sliding block</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/SciML/ComponentArrays.jl/blob/main/docs/src/examples/coulomb_control.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Control-of-a-sliding-block"><a class="docs-heading-anchor" href="#Control-of-a-sliding-block">Control of a sliding block</a><a id="Control-of-a-sliding-block-1"></a><a class="docs-heading-anchor-permalink" href="#Control-of-a-sliding-block" title="Permalink"></a></h1><pre><code class="language-julia hljs">using ComponentArrays
+using DifferentialEquations
+using Interact: @manipulate
+using Parameters: @unpack
+using Plots</code></pre><h2 id="Problem-Setup"><a class="docs-heading-anchor" href="#Problem-Setup">Problem Setup</a><a id="Problem-Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Problem-Setup" title="Permalink"></a></h2><pre><code class="language-julia hljs">const g = 9.80665
+
+maybe_apply(f::Function, x, p, t) = f(x, p, t)
+maybe_apply(f, x, p, t) = f
+
+# Applies functions of form f(x,p,t) to be applied and passed in as inputs
+function simulator(func; kwargs...)
+    simfun(dx, x, p, t) = func(
+        dx, x, p, t; map(f-&gt;maybe_apply(f, x, p, t), (; kwargs...))...)
+    simfun(x, p, t) = func(x, p, t; map(f-&gt;maybe_apply(f, x, p, t), (; kwargs...))...)
+    return simfun
+end
+
+softsign(x) = tanh(1e3x)</code></pre><h2 id="Component-Functions"><a class="docs-heading-anchor" href="#Component-Functions">Component Functions</a><a id="Component-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Component-Functions" title="Permalink"></a></h2><h3 id="A-sliding-block-with-two-different-friction-models"><a class="docs-heading-anchor" href="#A-sliding-block-with-two-different-friction-models">A sliding block with two different friction models</a><a id="A-sliding-block-with-two-different-friction-models-1"></a><a class="docs-heading-anchor-permalink" href="#A-sliding-block-with-two-different-friction-models" title="Permalink"></a></h3><pre><code class="language-julia hljs"># Sliding block with viscous friction
+function viscous_block!(D, vars, p, t; u = 0.0)
+    @unpack m, c, k = p
+    @unpack v, x = vars
+
+    D.x = v
+    D.v = (-c*v + k*(u-x))/m
+    return x
+end
+
+# Sliding block with coulomb friction
+function coulomb_block!(D, vars, p, t; u = 0.0)
+    @unpack m, μ, k = p
+    @unpack v, x = vars
+
+    D.x = v
+    a = -μ*g*softsign(v) + k*(u-x)/m
+    D.v = abs(a)&lt;1e-3 &amp;&amp; abs(v)&lt;1e-3 ? -10v : a #deadzone to help the simulation
+    return x
+end</code></pre><h3 id="PID-feedback-control"><a class="docs-heading-anchor" href="#PID-feedback-control">PID feedback control</a><a id="PID-feedback-control-1"></a><a class="docs-heading-anchor-permalink" href="#PID-feedback-control" title="Permalink"></a></h3><pre><code class="language-julia hljs">function PID_controller!(D, vars, p, t; err = 0.0, v = 0.0)
+    @unpack kp, ki, kd = p
+    @unpack x = vars
+
+    D.x = ki*err
+    return x + kp*err + kd*v
+end
+
+function feedback_sys!(D, components, p, t; ref = 0.0)
+    @unpack ctrl, plant = components
+
+    u = p.ctrl.fun(D.ctrl, ctrl, p.ctrl.params, t; err = ref-plant.x, v = -plant.v)
+    return p.plant.fun(D.plant, plant, p.plant.params, t; u = u)
+end
+
+step_input(; time = 1.0, mag = 1.0) = (x, p, t) -&gt; t&gt;time ? mag : 0
+sine_input(; mag = 1.0, period = 10.0) = (x, p, t) -&gt; mag*sin(t*2π/period)
+
+# Equivalent viscous damping coefficient taken from:
+# https://engineering.purdue.edu/~deadams/ME563/lecture2010.pdf
+visc_equiv(μ, N, ω, mag) = 4*μ*N/(π*ω*mag)</code></pre><h2 id="Open-Loop-Response"><a class="docs-heading-anchor" href="#Open-Loop-Response">Open-Loop Response</a><a id="Open-Loop-Response-1"></a><a class="docs-heading-anchor-permalink" href="#Open-Loop-Response" title="Permalink"></a></h2><p>To see the open-loop response of the coulomb system, let&#39;s set the input to <code>5</code> and plot the results.</p><pre><code class="language-julia hljs">const tspan = (0.0, 30.0)
+const m = 50.0
+const μ = 0.1
+const k = 50.0
+
+p = (m = m, μ = μ, k = k)
+ic = ComponentArray(v = 0, x = 0)
+
+ODEProblem(simulator(coulomb_block!, u = 5), ic, tspan, p) |&gt; solve |&gt; plot</code></pre><p><img src="../../assets/simple_coulomb.png" alt/></p><h2 id="Closed-Loop-Response"><a class="docs-heading-anchor" href="#Closed-Loop-Response">Closed-Loop Response</a><a id="Closed-Loop-Response-1"></a><a class="docs-heading-anchor-permalink" href="#Closed-Loop-Response" title="Permalink"></a></h2><p>For the closed-loop response, let&#39;s make an interactive GUI. Since we are using <code>ComponentArray</code>s, we don&#39;t have to change anything about our plant model to incorporate it in the overall system simulation.</p><pre><code class="language-julia hljs">p = (
+    ctrl = (
+        params = (kp = 13, ki = 12, kd = 5),
+        fun = PID_controller!
+    ),
+    plant = (
+        params = plant_p,
+        fun = coulomb_block!
+    )
+)
+
+ic = ComponentArray(ctrl = (; x = 0), plant = plant_ic)
+
+sol = ODEProblem(simulator(feedback_sys!, ref = 10), ic, tspan, p) |&gt; solve
+plot(sol, vars = 3)</code></pre><pre><code class="language-julia hljs">## Interactive GUI for switching out plant models and varying PID gains
+@manipulate for kp in 0:0.01:15,
+    ki in 0:0.01:15,
+    kd in 0:0.01:15,
+    damping in Dict(
+        &quot;Coulomb&quot; =&gt; coulomb_block!,
+        &quot;Viscous&quot; =&gt; viscous_block!
+    ),
+    reference in Dict(
+        &quot;Sine&quot; =&gt; sine_input,
+        &quot;Step&quot; =&gt; step_input
+    ),
+    magnitude in 0:0.01:10, # pop-pop!
+    period in 1:0.01:30,
+    plot_v in false
+
+    # Inputs
+    tspan = (0.0, 30.0)
+
+    ctrl_fun = PID_controller!
+    # plant_fun = coulomb_block!
+
+    ref = if reference==sine_input
+        reference(period = period, mag = magnitude)
+    else
+        reference(mag = magnitude)
+    end
+
+    m = 50.0
+    μ = 0.1
+    ω = 2π/period
+    c = 4*μ*m*g/(π*ω*magnitude) # Viscous equivalent damping
+    k = 50.0
+
+    plant_p = (m = m, μ = μ, c = c, k = k) # We&#39;ll just put everything for both models in here
+    ctrl_p = (kp = kp, ki = ki, kd = kd)
+
+    plant_ic = (v = 0, x = 0)
+    ctrl_ic = (; x = 0)
+
+    # Set up and solve
+    sys_p = (
+        ctrl = (
+            params = ctrl_p,
+            fun = ctrl_fun
+        ),
+        plant = (
+            params = plant_p,
+            fun = damping
+        )
+    )
+    sys_ic = ComponentArray(ctrl = ctrl_ic, plant = plant_ic)
+    sys_fun = ODEFunction(simulator(feedback_sys!, ref = ref), syms = [:u, :v, :x])
+    sys_prob = ODEProblem(sys_fun, sys_ic, tspan, sys_p)
+
+    sol = solve(sys_prob, Tsit5())
+
+    # Plot
+    t = tspan[1]:0.1:tspan[2]
+    lims = magnitude*[-1, 1]
+    plotvars = plot_v ? [3, 2] : [3]
+    strip = plot(t, ref.(0, 0, t), ylim = 1.2lims, label = &quot;r(t)&quot;)
+    plot!(strip, sol, vars = plotvars)
+    phase = plot(ref.(0, 0, t), map(x-&gt;x.plant.x, sol(t).u),
+        xlim = lims,
+        ylim = 1.2lims,
+        legend = false,
+        xlabel = &quot;r(t)&quot;,
+        ylabel = &quot;x(t)&quot;
+    )
+    plot(strip, phase, layout = (2, 1), size = (700, 800))
+end</code></pre><p><img src="../../assets/coulomb_control.png" alt/></p></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Wednesday 29 October 2025 14:09">Wednesday 29 October 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
