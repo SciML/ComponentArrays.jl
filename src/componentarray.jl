@@ -307,6 +307,19 @@ function last_index(f::FlatAxis)
     return last_index(last(nt))
 end
 
+# length information is in Axis, use it to make SVector creation type stable
+@inline _hasNullOrFlatAxis(ca) = any(map(ax -> ax isa NullorFlatAxis, getaxes(ca)))
+function Base.length(ca::ComponentArray) 
+    # vca2 = vcat(ca2', ca2') #has not length - is it a valid ComponentVector
+    # or rather a Vector<ComponentVector>
+    _hasNullOrFlatAxis(ca) && return(length(getdata(ca)))
+    prod(length.(getaxes(ca)))
+end
+function Base.size(ca::ComponentArray) 
+    _hasNullOrFlatAxis(ca) && return(size(getdata(ca)))
+    map(length, getaxes(ca))
+end
+
 # Reduce singleton dimensions
 remove_nulls() = ()
 remove_nulls(x1, args...) = (x1, remove_nulls(args...)...)

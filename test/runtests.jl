@@ -971,6 +971,14 @@ end
     end
 end
 
+@testset "length typestable" begin
+    # function boundary, so that cv is type-inferred
+    test_create_svector = (cv) -> SVector{length(cv)}(cv)
+    @inferred test_create_svector(ComponentVector(a=1:3));
+    test_create_smatrix = (cmat) -> SMatrix{size(cmat)...}(cmat)
+    @test (@inferred test_create_smatrix(cmat)) isa SMatrix
+end;
+
 @testset "Autodiff" begin
     include("autodiff_tests.jl")
 end
