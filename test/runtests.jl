@@ -982,3 +982,7 @@ end
 @testset "Reactant" begin
     include("reactant_tests.jl")
 end
+
+@testset "JET" begin
+    include("jet_tests.jl")
+end
