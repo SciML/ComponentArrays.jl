@@ -166,3 +166,4 @@ lotka_sol = solve(lotka_prob)
 Notice how cleanly the `composed!` function can pass variables from one function to another with no array index juggling in sight. This is especially useful for large models as it becomes harder to keep track top-level model array position when adding new or deleting old components from the model. We could go further and compose `composed!` with other components ad (practically) infinitum with no mental bookkeeping.
 
 The main benefit, however, is now our differential equations are unit testable. Both `lorenz` and `lotka` can be run as their own `ODEProblem` with `f` set to zero to see the unforced response.
+
