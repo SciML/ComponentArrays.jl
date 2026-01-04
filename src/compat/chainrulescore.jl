@@ -1,5 +1,8 @@
-function ChainRulesCore.rrule(::typeof(getproperty), x::ComponentArray, s::Union{
-        Symbol, Val})
+function ChainRulesCore.rrule(
+        ::typeof(getproperty), x::ComponentArray, s::Union{
+            Symbol, Val,
+        }
+    )
     return getproperty(x, s), Δ -> getproperty_adjoint(ChainRulesCore.unthunk(Δ), x, s)
 end
 
@@ -25,36 +28,43 @@ end
 
 function ChainRulesCore.rrule(
         cfg::ChainRulesCore.RuleConfig{>:ChainRulesCore.HasReverseMode},
-        ::typeof(__setproperty!), x, s, Δ)
+        ::typeof(__setproperty!), x, s, Δ
+    )
     y_, pb_f = ChainRulesCore.rrule_via_ad(cfg, __setproperty!, Val(true), x, s, Δ)
     return y_, pb_f
 end
 
 function ChainRulesCore.rrule(::typeof(getdata), x::ComponentArray)
-    getdata(x),
-    Δ -> (ChainRulesCore.NoTangent(), ComponentArray(ChainRulesCore.unthunk(Δ), getaxes(x)))
+    return getdata(x),
+        Δ -> (ChainRulesCore.NoTangent(), ComponentArray(ChainRulesCore.unthunk(Δ), getaxes(x)))
 end
 
 function ChainRulesCore.rrule(::Type{ComponentArray}, data, axes)
-    ComponentArray(data, axes),
-    Δ -> (ChainRulesCore.NoTangent(), getdata(ChainRulesCore.unthunk(Δ)),
-        ChainRulesCore.NoTangent())
+    return ComponentArray(data, axes),
+        Δ -> (
+            ChainRulesCore.NoTangent(), getdata(ChainRulesCore.unthunk(Δ)),
+            ChainRulesCore.NoTangent(),
+        )
 end
 
 function ChainRulesCore.ProjectTo(ca::ComponentArray)
     return ChainRulesCore.ProjectTo{ComponentArray}(;
-        project = ChainRulesCore.ProjectTo(getdata(ca)), axes = getaxes(ca))
+        project = ChainRulesCore.ProjectTo(getdata(ca)), axes = getaxes(ca)
+    )
 end
 
 function (p::ChainRulesCore.ProjectTo{ComponentArray})(dx::AbstractArray)
-    ComponentArray(p.project(dx), p.axes)
+    return ComponentArray(p.project(dx), p.axes)
 end
 
 # Prevent double projection
 (p::ChainRulesCore.ProjectTo{ComponentArray})(dx::ComponentArray) = dx
 
-function (p::ChainRulesCore.ProjectTo{ComponentArray})(t::ChainRulesCore.Tangent{
-        A, <:NamedTuple}) where {A}
+function (p::ChainRulesCore.ProjectTo{ComponentArray})(
+        t::ChainRulesCore.Tangent{
+            A, <:NamedTuple,
+        }
+    ) where {A}
     nt = Functors.fmap(ChainRulesCore.backing, ChainRulesCore.backing(t))
     return ComponentArray(nt)
 end
@@ -68,8 +78,10 @@ function ChainRulesCore.rrule(::Type{CA}, nt::NamedTuple) where {CA <: Component
         if length(Δ) == length(y)
             return ∇NamedTupleToComponentArray(ComponentArray(vec(Δ), getaxes(y)))
         end
-        error("Got pullback input of shape $(size(Δ)) & type $(typeof(Δ)) for output " *
-              "of shape $(size(y)) & type $(typeof(y))")
+        error(
+            "Got pullback input of shape $(size(Δ)) & type $(typeof(Δ)) for output " *
+                "of shape $(size(y)) & type $(typeof(y))"
+        )
         return nothing
     end
 

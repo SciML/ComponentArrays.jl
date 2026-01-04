@@ -20,16 +20,23 @@ function partition(m, N1, N2)
     ax = axes(m)
     firsts = firstindex.(ax)
     lasts = lastindex.(ax)
-    return (view(m, i:(i + N1 - 1), j:(j + N2 - 1)) for i in firsts[1]:N1:lasts[1],
-    j in firsts[2]:N2:lasts[2])
+    return (
+        view(m, i:(i + N1 - 1), j:(j + N2 - 1)) for i in firsts[1]:N1:lasts[1],
+            j in firsts[2]:N2:lasts[2]
+    )
 end
 # Slower fallback for higher dimensions
 function partition(a::A, N::Tuple) where {A <: AbstractArray}
     ax = axes(a)
     offs = firstindex.(ax)
-    return (view(a, (:).((I.I .- 1) .* N .+ offs, ((I.I .- 1) .* N .+ N .- 1 .+ offs))...) for I in
-                                                                                               CartesianIndices(div.(
-        size(a), N)))
+    return (
+        view(a, (:).((I.I .- 1) .* N .+ offs, ((I.I .- 1) .* N .+ N .- 1 .+ offs))...) for I in
+            CartesianIndices(
+                div.(
+                    size(a), N
+                )
+            )
+    )
 end
 # partition(a::A, N::Tuple) where A<:AbstractVector = reshape(view(a, :), N)
 
@@ -37,10 +44,10 @@ end
 filter_by_type(::Type{T}, args...) where {T} = filter_by_type(T, (), args...)
 filter_by_type(::Type{T}, part::Tuple) where {T} = part
 function filter_by_type(::Type{T}, part::Tuple, ax, args...) where {T}
-    filter_by_type(T, part, args...)
+    return filter_by_type(T, part, args...)
 end
 function filter_by_type(::Type{T}, part::Tuple, ax::T, args...) where {T}
-    filter_by_type(T, (part..., ax), args...)
+    return filter_by_type(T, (part..., ax), args...)
 end
 
 # Flat length of an arbitrarily nested named tuple
@@ -53,13 +60,13 @@ recursive_length(nt::NamedTuple{(), Tuple{}}) = 0
 
 # Find the highest element type
 function recursive_eltype(nt::NamedTuple)
-    isempty(nt) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, nt)
+    return isempty(nt) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, nt)
 end
 function recursive_eltype(x::AbstractArray{<:Any})
-    isempty(x) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, x)
+    return isempty(x) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, x)
 end
 function recursive_eltype(x::Dict)
-    isempty(x) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, values(x))
+    return isempty(x) ? Base.Bottom : mapreduce(recursive_eltype, promote_type, values(x))
 end
 recursive_eltype(::AbstractArray{T, N}) where {T <: Number, N} = T
 recursive_eltype(x) = typeof(x)

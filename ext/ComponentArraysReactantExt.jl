@@ -4,7 +4,7 @@ using ArrayInterface: ArrayInterface
 using ComponentArrays, Reactant
 
 const TracedComponentVector{T} = ComponentVector{
-    Reactant.TracedRNumber{T}, <:Reactant.TracedRArray{T}
+    Reactant.TracedRNumber{T}, <:Reactant.TracedRArray{T},
 } where {T}
 
 # Reactant is good at memory management but not great at handling wrapped types. So we avoid

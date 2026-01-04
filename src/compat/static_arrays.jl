@@ -1,11 +1,12 @@
 function ComponentArray{A}(::UndefInitializer, ax::Axes) where {
-        A <: StaticArray, Axes <: Tuple}
+        A <: StaticArray, Axes <: Tuple,
+    }
     return ComponentArray(similar(A), ax...)
 end
 
 _maybe_SArray(x::SubArray, ::Val{N}, ::FlatAxis) where {N} = SVector{N}(x)
 function _maybe_SArray(x::Base.ReshapedArray, ::Val, ::ShapedAxis{Sz}) where {Sz}
-    SArray{Tuple{Sz...}}(x)
+    return SArray{Tuple{Sz...}}(x)
 end
 _maybe_SArray(x, ::Val, ::Shaped1DAxis{Sz}) where {Sz} = SArray{Tuple{Sz...}}(x)
 _maybe_SArray(x, vals...) = x

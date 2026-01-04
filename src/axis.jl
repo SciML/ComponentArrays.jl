@@ -94,7 +94,7 @@ struct PartitionedAxis{PartSz, IdxMap, Ax <: AbstractAxis{IdxMap}} <: AbstractAx
     end
 end
 function PartitionedAxis{PartSz, IdxMap, Ax}() where {PartSz, IdxMap, Ax}
-    PartitionedAxis(PartSz, Ax())
+    return PartitionedAxis(PartSz, Ax())
 end
 PartitionedAxis(PartSz, IdxMap) = PartitionedAxis(PartSz, Axis(IdxMap))
 
@@ -122,18 +122,25 @@ ViewAxis(Inds) = Inds
 
 Base.length(ax::ViewAxis{Inds}) where {Inds} = length(Inds)
 # Fix https://github.com/Deltares/Ribasim/issues/2028
-function Base.getindex(::ViewAxis{Inds, IdxMap, <:ComponentArrays.Shaped1DAxis},
-        idx::Integer) where {Inds, IdxMap}
-    Inds[idx]
-end
-function Base.iterate(::ViewAxis{
-        Inds, IdxMap, <:ComponentArrays.Shaped1DAxis}) where {Inds, IdxMap}
-    iterate(Inds)
+function Base.getindex(
+        ::ViewAxis{Inds, IdxMap, <:ComponentArrays.Shaped1DAxis},
+        idx::Integer
+    ) where {Inds, IdxMap}
+    return Inds[idx]
 end
 function Base.iterate(
         ::ViewAxis{
-            Inds, IdxMap, <:ComponentArrays.Shaped1DAxis}, idx) where {Inds, IdxMap}
-    iterate(Inds, idx)
+            Inds, IdxMap, <:ComponentArrays.Shaped1DAxis,
+        }
+    ) where {Inds, IdxMap}
+    return iterate(Inds)
+end
+function Base.iterate(
+        ::ViewAxis{
+            Inds, IdxMap, <:ComponentArrays.Shaped1DAxis,
+        }, idx
+    ) where {Inds, IdxMap}
+    return iterate(Inds, idx)
 end
 
 const View = ViewAxis
@@ -154,9 +161,11 @@ Axis(x) = FlatAxis()
 
 const NotShapedAxis = Union{Axis{IdxMap}, FlatAxis, NullAxis, Shaped1DAxis} where {IdxMap}
 const NotPartitionedAxis = Union{
-    Axis{IdxMap}, FlatAxis, NullAxis, ShapedAxis{Shape}, Shaped1DAxis} where {Shape, IdxMap}
+    Axis{IdxMap}, FlatAxis, NullAxis, ShapedAxis{Shape}, Shaped1DAxis,
+} where {Shape, IdxMap}
 const NotShapedOrPartitionedAxis = Union{
-    Axis{IdxMap}, FlatAxis, Shaped1DAxis} where {IdxMap}
+    Axis{IdxMap}, FlatAxis, Shaped1DAxis,
+} where {IdxMap}
 
 Base.merge(axs::Vararg{Axis}) = Axis(merge(indexmap.(axs)...))
 
@@ -167,10 +176,12 @@ Base.keys(ax::AbstractAxis) = keys(indexmap(ax))
 
 reindex(i, offset) = i .+ offset
 reindex(ax::FlatAxis, _) = ax
-reindex(ax::Axis, offset) = Axis(map(x->reindex(x, offset), indexmap(ax)))
+reindex(ax::Axis, offset) = Axis(map(x -> reindex(x, offset), indexmap(ax)))
 reindex(ax::ViewAxis, offset) = ViewAxis(viewindex(ax) .+ offset, indexmap(ax))
-function reindex(ax::ViewAxis{OldInds, IdxMap, Ax},
-        offset) where {OldInds, IdxMap, Ax <: Union{Shaped1DAxis, ShapedAxis}}
+function reindex(
+        ax::ViewAxis{OldInds, IdxMap, Ax},
+        offset
+    ) where {OldInds, IdxMap, Ax <: Union{Shaped1DAxis, ShapedAxis}}
     NewInds = viewindex(ax) .+ offset
     return ViewAxis(NewInds, Ax())
 end
@@ -181,14 +192,19 @@ end
 @inline Base.getindex(ax::AbstractAxis, ::Colon) = ComponentIndex(:, ax)
 @inline Base.getindex(::AbstractAxis{IdxMap}, s::Symbol) where {IdxMap} = ComponentIndex(getproperty(IdxMap, s))
 @inline Base.getindex(
-    ::AbstractAxis{IdxMap}, ::Val{s}) where {
-    IdxMap, s} = ComponentIndex(getproperty(IdxMap, s))
-function Base.getindex(ax::AbstractAxis, syms::Union{
-        NTuple{N, Symbol}, <:AbstractArray{Symbol}}) where {N}
+    ::AbstractAxis{IdxMap}, ::Val{s}
+) where {
+    IdxMap, s,
+} = ComponentIndex(getproperty(IdxMap, s))
+function Base.getindex(
+        ax::AbstractAxis, syms::Union{
+            NTuple{N, Symbol}, <:AbstractArray{Symbol},
+        }
+    ) where {N}
     @assert allunique(syms) "Indexing symbols must all be unique. Got $syms"
     c_inds = getindex.((ax,), syms)
-    inds = map(x->x.idx, c_inds)
-    axs = map(x->x.ax, c_inds)
+    inds = map(x -> x.idx, c_inds)
+    axs = map(x -> x.ax, c_inds)
     last_index = 0
     new_axs = map(inds, axs) do i, ax
         first_index = last_index + 1
@@ -231,5 +247,5 @@ Base.getindex(ax::CombinedAxis, i::AbstractArray) = _array_axis(ax)[i]
 Base.length(ax::CombinedAxis) = lastindex(ax) - firstindex(ax) + 1
 
 function Base.CartesianIndices(ax::Tuple{CombinedAxis, Vararg{CombinedAxis}})
-    CartesianIndices(_array_axis.(ax))
+    return CartesianIndices(_array_axis.(ax))
 end

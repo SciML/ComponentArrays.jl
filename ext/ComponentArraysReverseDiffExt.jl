@@ -3,10 +3,11 @@ module ComponentArraysReverseDiffExt
 using ComponentArrays, ReverseDiff
 
 const TrackedComponentArray{
-    V, D, N, DA, A, Ax} = ReverseDiff.TrackedArray{V, D, N, ComponentArray{V, N, A, Ax}, DA}
+    V, D, N, DA, A, Ax,
+} = ReverseDiff.TrackedArray{V, D, N, ComponentArray{V, N, A, Ax}, DA}
 
 function maybe_tracked_array(val::AbstractArray, der, tape, inds, origin)
-    ReverseDiff.TrackedArray(val, der, tape)
+    return ReverseDiff.TrackedArray(val, der, tape)
 end
 function maybe_tracked_array(val::Real, der, tape, inds, origin::AbstractVector)
     ax = getaxes(ReverseDiff.value(origin))[1]
@@ -34,8 +35,12 @@ function Base.getproperty(tca::TrackedComponentArray, s::Symbol)
     end
 end
 
-function Base.propertynames(::TrackedComponentArray{V, D, N, DA, A,
-        Tuple{Ax}}) where {V, D, N, DA, A, Ax <: ComponentArrays.AbstractAxis}
+function Base.propertynames(
+        ::TrackedComponentArray{
+            V, D, N, DA, A,
+            Tuple{Ax},
+        }
+    ) where {V, D, N, DA, A, Ax <: ComponentArrays.AbstractAxis}
     return propertynames(ComponentArrays.indexmap(Ax))
 end
 
@@ -47,6 +52,7 @@ end
 @inline ComponentArrays.__value(x::AbstractArray{<:ReverseDiff.TrackedReal}) = ReverseDiff.value.(x)
 @inline ComponentArrays.__value(x::ReverseDiff.TrackedArray) = ReverseDiff.value(x)
 @inline ComponentArrays.__value(x::TrackedComponentArray) = ComponentArray(
-    ComponentArrays.__value(getdata(x)), getaxes(x))
+    ComponentArrays.__value(getdata(x)), getaxes(x)
+)
 
 end

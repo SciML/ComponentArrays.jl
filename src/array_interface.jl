@@ -2,7 +2,7 @@ Base.parent(x::ComponentArray) = getfield(x, :data)
 
 Base.size(x::ComponentArray) = size(getdata(x))
 function StaticArrayInterface.static_size(A::ComponentArray)
-    StaticArrayInterface.static_size(parent(A))
+    return StaticArrayInterface.static_size(parent(A))
 end
 
 Base.elsize(x::Type{<:ComponentArray{T, N, A, Axes}}) where {T, N, A, Axes} = Base.elsize(A)
@@ -11,16 +11,26 @@ Base.elsize(x::Type{<:ComponentArray{T, N, A, Axes}}) where {T, N, A, Axes} = Ba
 Base.axes(x::ComponentArray) = CombinedAxis.(getaxes(x), axes(getdata(x)))
 
 function Base.reinterpret(::Type{T}, x::ComponentArray, args...) where {T}
-    ComponentArray(reinterpret(T, getdata(x), args...), getaxes(x))
+    return ComponentArray(reinterpret(T, getdata(x), args...), getaxes(x))
 end
 
-function ArrayInterface.indices_do_not_alias(::Type{ComponentArray{
-        T, N, A, Axes}}) where {T, N, A, Axes}
-    ArrayInterface.indices_do_not_alias(A)
+function ArrayInterface.indices_do_not_alias(
+        ::Type{
+            ComponentArray{
+                T, N, A, Axes,
+            },
+        }
+    ) where {T, N, A, Axes}
+    return ArrayInterface.indices_do_not_alias(A)
 end
-function ArrayInterface.instances_do_not_alias(::Type{ComponentArray{
-        T, N, A, Axes}}) where {T, N, A, Axes}
-    ArrayInterface.instances_do_not_alias(A)
+function ArrayInterface.instances_do_not_alias(
+        ::Type{
+            ComponentArray{
+                T, N, A, Axes,
+            },
+        }
+    ) where {T, N, A, Axes}
+    return ArrayInterface.instances_do_not_alias(A)
 end
 
 # Cats
@@ -28,7 +38,7 @@ end
 function Base.hcat(x::AbstractComponentVecOrMat, y::AbstractComponentVecOrMat)
     ax_x, ax_y = second_axis.((x, y))
     if reduce((accum, key) -> accum || (key in keys(ax_x)), keys(ax_y); init = false) ||
-       getaxes(x)[1] != getaxes(y)[1]
+            getaxes(x)[1] != getaxes(y)[1]
         return hcat(getdata(x), getdata(y))
     else
         data_x, data_y = getdata.((x, y))
@@ -36,8 +46,12 @@ function Base.hcat(x::AbstractComponentVecOrMat, y::AbstractComponentVecOrMat)
         idxmap_x, idxmap_y = indexmap.((ax_x, ax_y))
         axs = getaxes(x)
         return ComponentArray(
-            hcat(data_x, data_y), axs[1], Axis((;
-                idxmap_x..., idxmap_y...)), axs[3:end]...)
+            hcat(data_x, data_y), axs[1], Axis(
+                (;
+                    idxmap_x..., idxmap_y...,
+                )
+            ), axs[3:end]...
+        )
     end
 end
 
@@ -62,7 +76,7 @@ end
 function Base.vcat(x::AbstractComponentVecOrMat{<:Number}, y::AbstractComponentVecOrMat{<:Number})
     ax_x, ax_y = getindex.(getaxes.((x, y)), 1)
     if reduce((accum, key) -> accum || (key in keys(ax_x)), keys(ax_y); init = false) ||
-       getaxes(x)[2:end] != getaxes(y)[2:end]
+            getaxes(x)[2:end] != getaxes(y)[2:end]
         return vcat(getdata(x), getdata(y))
     else
         data_x, data_y = getdata.((x, y))
@@ -72,16 +86,21 @@ function Base.vcat(x::AbstractComponentVecOrMat{<:Number}, y::AbstractComponentV
     end
 end
 function Base.vcat(x::CV...) where {CV <: AdjOrTransComponentArray{<:Number}}
-    ComponentArray(reduce(vcat, map(y->getdata(y.parent)', x)), getaxes(x[1]))
+    return ComponentArray(reduce(vcat, map(y -> getdata(y.parent)', x)), getaxes(x[1]))
 end
 Base.vcat(x::ComponentVector{<:Number}, args...) = vcat(getdata(x), getdata.(args)...)
-function Base.vcat(x::ComponentVector{<:Number},
-        args::Vararg{Union{Number, UniformScaling, AbstractVecOrMat{<:Number}}})
-    vcat(getdata(x), getdata.(args)...)
+function Base.vcat(
+        x::ComponentVector{<:Number},
+        args::Vararg{Union{Number, UniformScaling, AbstractVecOrMat{<:Number}}}
+    )
+    return vcat(getdata(x), getdata.(args)...)
 end
-function Base.vcat(x::ComponentVector{<:Number}, args::Vararg{
-        AbstractVector{T}, N}) where {T <: Number, N}
-    vcat(getdata(x), getdata.(args)...)
+function Base.vcat(
+        x::ComponentVector{<:Number}, args::Vararg{
+            AbstractVector{T}, N,
+        }
+    ) where {T <: Number, N}
+    return vcat(getdata(x), getdata.(args)...)
 end
 
 function Base.hvcat(row_lengths::NTuple{N, Int}, xs::Vararg{AbstractComponentVecOrMat}) where {N}
@@ -98,20 +117,23 @@ end
 
 function Base.permutedims(x::ComponentArray, dims)
     axs = getaxes(x)
-    return ComponentArray(permutedims(getdata(x), dims), map(i->axs[i], dims)...)
+    return ComponentArray(permutedims(getdata(x), dims), map(i -> axs[i], dims)...)
 end
 
 ## Indexing
 function Base.IndexStyle(::Type{<:ComponentArray{T, N, <:A, <:Axes}}) where {T, N, A, Axes}
-    IndexStyle(A)
+    return IndexStyle(A)
 end
 
 # Since we aren't really using the standard approach to indexing, this will forward things to
 # the correct methods
 Base.to_indices(x::ComponentArray, i::Tuple{Any}) = i
-function Base.to_indices(x::ComponentArray, i::NTuple{
-        N, Union{Integer, CartesianIndex}}) where {N}
-    i
+function Base.to_indices(
+        x::ComponentArray, i::NTuple{
+            N, Union{Integer, CartesianIndex},
+        }
+    ) where {N}
+    return i
 end
 Base.to_indices(x::ComponentArray, i::NTuple{N, Int64}) where {N} = i
 Base.to_index(x::ComponentArray, i) = i
@@ -131,20 +153,24 @@ Base.@propagate_inbounds Base.getindex(x::ComponentArray, ::Colon, ::Vararg{Colo
 
 # Set ComponentArray index
 Base.@propagate_inbounds Base.setindex!(
-    x::ComponentArray, v, idx::FlatOrColonIdx...) = setindex!(getdata(x), v, idx...)
+    x::ComponentArray, v, idx::FlatOrColonIdx...
+) = setindex!(getdata(x), v, idx...)
 Base.@propagate_inbounds Base.setindex!(x::ComponentArray, v, ::Colon) = setindex!(getdata(x), v, :)
 @inline Base.setindex!(x::ComponentArray, v, idx...) = setindex!(x, v, toval.(idx)...)
 @inline Base.setindex!(x::ComponentArray, v, idx::Vararg{Val}) = _setindex!(x, v, idx...)
 
 # Explicitly view
 Base.@propagate_inbounds Base.view(
-    x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}) = view(getdata(x), idx...)
+    x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}
+) = view(getdata(x), idx...)
 Base.@propagate_inbounds Base.view(x::ComponentArray, idx...) = _getindex(view, x, toval.(idx)...)
 
 Base.@propagate_inbounds Base.maybeview(
-    x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}) = Base.maybeview(getdata(x), idx...)
+    x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}
+) = Base.maybeview(getdata(x), idx...)
 Base.@propagate_inbounds Base.maybeview(
-    x::ComponentArray, idx...) = _getindex(Base.maybeview, x, toval.(idx)...)
+    x::ComponentArray, idx...
+) = _getindex(Base.maybeview, x, toval.(idx)...)
 
 # Generated get and set index methods to do all of the heavy lifting in the type domain
 @generated function _getindex(index_fun, x::ComponentArray, idx...)
@@ -167,18 +193,26 @@ end
 
 ## Linear Algebra
 function Base.pointer(x::ComponentArray{T, N, A, Axes}) where {T, N, A <: DenseArray, Axes}
-    pointer(getdata(x))
+    return pointer(getdata(x))
 end
 
-function Base.unsafe_convert(::Type{Ptr{T}}, x::ComponentArray{
-        T, N, A, Axes}) where {T, N, A, Axes}
-    Base.unsafe_convert(Ptr{T}, getdata(x))
+function Base.unsafe_convert(
+        ::Type{Ptr{T}}, x::ComponentArray{
+            T, N, A, Axes,
+        }
+    ) where {T, N, A, Axes}
+    return Base.unsafe_convert(Ptr{T}, getdata(x))
 end
 
 Base.strides(x::ComponentArray) = strides(getdata(x))
 for f in [:device, :stride_rank, :contiguous_axis, :contiguous_batch_size, :dense_dims]
-    @eval StaticArrayInterface.$f(::Type{ComponentArray{
-        T, N, A, Axes}}) where {T, N, A, Axes} = StaticArrayInterface.$f(A)
+    @eval StaticArrayInterface.$f(
+        ::Type{
+            ComponentArray{
+                T, N, A, Axes,
+            },
+        }
+    ) where {T, N, A, Axes} = StaticArrayInterface.$f(A)
 end
 
 Base.stride(x::ComponentArray, k) = stride(getdata(x), k)

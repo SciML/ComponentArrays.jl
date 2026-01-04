@@ -1,4 +1,3 @@
-
 """
     labels(x::ComponentVector)
 
@@ -31,16 +30,16 @@ julia> ComponentArrays.labels(x)
 
 see also [`label2index`](@ref)
 """
-labels(x::ComponentVector) = map(x->x[(firstindex(x) + 1):end], _labels(x))
-labels(x) = map(x->x[firstindex(x):end], _labels(x))
+labels(x::ComponentVector) = map(x -> x[(firstindex(x) + 1):end], _labels(x))
+labels(x) = map(x -> x[firstindex(x):end], _labels(x))
 
 _labels(x::ComponentVector) = vcat((".$(key)" .* _labels(x[key]) for key in keys(x))...)
 function _labels(x::AbstractArray{<:ComponentArray})
-    vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
+    return vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
 end
 _labels(x::LazyArray) = vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
 function _labels(x::AbstractArray)
-    vcat(("[" * join(i.I, ",") * "]" for i in CartesianIndices(x))...)
+    return vcat(("[" * join(i.I, ",") * "]" for i in CartesianIndices(x))...)
 end
 _labels(x) = ""
 
