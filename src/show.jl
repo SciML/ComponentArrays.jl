@@ -37,10 +37,6 @@ _print_type_short(io, ::Type{<:ComponentArray{T,N,<:SubArray}}; color=:normal) w
 _print_type_short(io, ::Type{<:ComponentArray{T,1,<:SubArray}}; color=:normal) where {T} = printstyled(io, "ComponentVector{$T,SubArray...}"; color=color)
 _print_type_short(io, ::Type{<:ComponentArray{T,2,<:SubArray}}; color=:normal) where {T} = printstyled(io, "ComponentMatrix{$T,SubArray...}"; color=color)
 
-@static if v"1.6" ≤ VERSION < v"1.8"
-    Base.print_type_stacktrace(io, CA::Type{<:ComponentArray}; color=:normal) = _print_type_short(io, CA; color=color)
-end
-
 function Base.show(io::IO, x::ComponentVector)
     print(io, "(")
     for (i,key) in enumerate(keys(x))
