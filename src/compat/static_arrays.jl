@@ -3,11 +3,15 @@ function ComponentArray{A}(::UndefInitializer, ax::Axes) where {
     return ComponentArray(similar(A), ax...)
 end
 
-_maybe_SArray(x::SubArray, ::Val{N}, ::FlatAxis) where {N} = SVector{N}(x)
-function _maybe_SArray(x::Base.ReshapedArray, ::Val, ::ShapedAxis{Sz}) where {Sz}
-    SArray{Tuple{Sz...}}(x)
+function _maybe_SArray(x::SubArray{T}, ::Val{N}, ::FlatAxis) where {T, N}
+    SVector{N, T}(Tuple(x))
 end
-_maybe_SArray(x, ::Val, ::Shaped1DAxis{Sz}) where {Sz} = SArray{Tuple{Sz...}}(x)
+function _maybe_SArray(x::Base.ReshapedArray{T, N}, ::Val, ::ShapedAxis{Sz}) where {T, N, Sz}
+    SArray{Tuple{Sz...}, T, N, prod(Sz)}(Tuple(x))
+end
+function _maybe_SArray(x::AbstractArray{T}, ::Val, ::Shaped1DAxis{Sz}) where {T, Sz}
+    SVector{Sz[1], T}(Tuple(x))
+end
 _maybe_SArray(x, vals...) = x
 
 @generated function static_getproperty(ca::ComponentVector, ::Val{s}) where {s}
