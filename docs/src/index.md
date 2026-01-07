@@ -9,8 +9,3 @@ language for, but without actually needing a modeling language. The main targets
 in [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) and
 [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl), but anything that requires
 flat vectors is fair game.
-
-```@contents
-Pages = ["examples/example1.md"]
-Depth = 2
-```

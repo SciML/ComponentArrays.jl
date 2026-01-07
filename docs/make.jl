@@ -17,6 +17,7 @@ makedocs(;
         "Examples" => [
             "examples/DiffEqFlux.md",
             "examples/adaptive_control.md",
+            "examples/coulomb_control.md",
             "examples/ODE_jac.md"
         ],
         "API" => "api.md"
