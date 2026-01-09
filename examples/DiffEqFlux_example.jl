@@ -23,12 +23,12 @@ tspan2 = (0.0f0, 25.0f0)
 # Make truth data
 function trueODEfunc(du, u, p, t)
     true_A = [-0.1 2.0; -2.0 -0.1]
-    du .= ((u .^ 3)'true_A)'
+    return du .= ((u .^ 3)'true_A)'
 end
 
 t = range(tspan[1], tspan[2], length = datasize)
 # t = Float32.(vcat(range(0.0, 0.9, length=10), 10 .^ range(log10(tspan[1]+1), log10(tspan[2]), length=datasize-10)))
-t = Float32.([0; 10 .^ range(log10(tspan[1] + 0.01), log10(tspan[2]), length = datasize-1)])
+t = Float32.([0; 10 .^ range(log10(tspan[1] + 0.01), log10(tspan[2]), length = datasize - 1)])
 prob = ODEProblem(trueODEfunc, u0, tspan2)
 ode_sol = solve(prob, Tsit5())
 ode_data = Array(ode_sol(t)) + MeasurementNoise(0.1)
@@ -39,7 +39,7 @@ neural_layer(in, out) = ComponentArray{Float32}(W = glorot_uniform(out, in), b =
 # Dense neural layer function
 dense(layer, activation = identity) = u -> activation.(layer.W * u + layer.b)
 
-# Neural ODE function 
+# Neural ODE function
 dudt(u, p, t) = u .^ 3 |> dense(p.L1, σ) |> dense(p.L2)
 
 prob = ODEProblem(dudt, u0, tspan2)
@@ -56,7 +56,7 @@ full_sol(θ) = solve(prob, Tsit5(), u0 = θ.u, p = θ.p)
 function loss_n_ode(θ)
     pred = predict_n_ode(θ)
 
-    loss = sum(abs2, ode_data .- pred)/datasize + 0.1*(sum(abs, θ.p)/length(θ.p))
+    loss = sum(abs2, ode_data .- pred) / datasize + 0.1 * (sum(abs, θ.p) / length(θ.p))
     return loss, pred
 end
 loss_n_ode(θ)
@@ -83,12 +83,18 @@ cb = function (θ, loss, pred; doplot = false)
     plot!(pl_3, ode_sol, vars = (1, 2), label = "truth")
     scatter!(pl_3, pred[1, :], pred[2, :], label = "predicted data")
     scatter!(pl_3, ode_data[1, :], ode_data[2, :], label = "measured data")
-    plot!(pl_3, hcat(pred[1, :], ode_data[1, :])', hcat(pred[2, :], ode_data[2, :])',
-        label = false, color = :lightgray, legend = :bottomright)
+    plot!(
+        pl_3, hcat(pred[1, :], ode_data[1, :])', hcat(pred[2, :], ode_data[2, :])',
+        label = false, color = :lightgray, legend = :bottomright
+    )
 
-    display(plot(
-        plot(pl_1, pl_2, layout = (2, 1), size = (400, 500)), pl_3, layout = (1, 2), size = (
-            950, 500)))
+    display(
+        plot(
+            plot(pl_1, pl_2, layout = (2, 1), size = (400, 500)), pl_3, layout = (1, 2), size = (
+                950, 500,
+            )
+        )
+    )
     # frame(anim)
     return false
 end

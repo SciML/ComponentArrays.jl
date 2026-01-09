@@ -12,8 +12,9 @@ maybe_apply(f, x, p, t) = f
 
 function apply_inputs(func; kwargs...)
     simfun(dx, x, p, t) = func(
-        dx, x, p, t; map(f->maybe_apply(f, x, p, t), (; kwargs...))...)
-    simfun(x, p, t) = func(x, p, t; map(f->maybe_apply(f, x, p, t), (; kwargs...))...)
+        dx, x, p, t; map(f -> maybe_apply(f, x, p, t), (; kwargs...))...
+    )
+    simfun(x, p, t) = func(x, p, t; map(f -> maybe_apply(f, x, p, t), (; kwargs...))...)
     return simfun
 end
 
@@ -27,7 +28,7 @@ SISO_simulator(P::TransferFunction) = SISO_simulator(ss(P))
 function SISO_simulator(P::AbstractStateSpace)
     @unpack A, B, C, D = P
 
-    if size(D)!=(1, 1)
+    if size(D) != (1, 1)
         error("This is not a SISO system")
     end
 
@@ -37,8 +38,8 @@ function SISO_simulator(P::AbstractStateSpace)
     DD = D[1, 1]
 
     return function sim!(dx, x, p, t; u = 0.0)
-        dx .= A*x + BB*u
-        return CC*x + DD*u
+        dx .= A * x + BB * u
+        return CC * x + DD * u
     end
 end
 
@@ -60,13 +61,13 @@ nominal_sim! = SISO_simulator(nominal_plant)
 
 # To test robustness to uncertainty, we'll also include unmodeled dynamics with an entirely
 # different structure than our nominal plant model.
-unmodeled_dynamics = 229/(s^2 + 30s + 229)
+unmodeled_dynamics = 229 / (s^2 + 30s + 229)
 truth_plant = nominal_plant * unmodeled_dynamics
 truth_sim! = SISO_simulator(truth_plant)
 
 # We'll make a first-order sensor as well so we can add noise to our measurement
 τ = 0.005
-sensor_plant = 1 / (τ*s + 1)
+sensor_plant = 1 / (τ * s + 1)
 sensor_sim! = SISO_simulator(sensor_plant)
 
 ## Derivative functions
@@ -76,7 +77,7 @@ control(θ, w) = θ'w
 
 # We'll use a simple gradient descent adaptation law
 function adapt!(Dθ, θ, γ, t; e, w)
-    Dθ .= -γ*e*w
+    Dθ .= -γ * e * w
     return nothing
 end
 
@@ -98,7 +99,7 @@ function feedback_sys!(D, vars, p, t; ym, r, n)
     return yp
 end
 # Now the full system takes in an input signal `r`, feeds it through the reference model,
-# and feeds the output of the reference model `ym` and the input signal to `feedback_sys`. 
+# and feeds the output of the reference model `ym` and the input signal to `feedback_sys`.
 function system!(D, vars, p, t; r = 0.0, n = 0.0)
     @unpack reference_model, feedback_loop = vars
 
@@ -122,16 +123,18 @@ sensor_ic = zeros(1)
 θ_est_ic = ComponentArray(θr = 0.0, θy = 0.0)
 
 ## Set up and run Simulation
-function simulate(plant_fun, plant_ic;
+function simulate(
+        plant_fun, plant_ic;
         tspan = tspan,
         input_signal = input_signal,
         adapt_gain = 1.5,
         noise_param = nothing,
-        deterministic_noise = 0.0)
+        deterministic_noise = 0.0
+    )
     noise(D, vars, p, t) = (D.feedback_loop.sensor[1] = noise_param)
 
     # Truth control parameters
-    θ_truth = (r = bm/bp, y = (ap-am)/bp)
+    θ_truth = (r = bm / bp, y = (ap - am) / bp)
 
     # Initial conditions
     ic = ComponentArray(
@@ -139,14 +142,14 @@ function simulate(plant_fun, plant_ic;
         feedback_loop = (
             parameter_estimates = θ_est_ic,
             sensor = sensor_ic,
-            plant_model = plant_ic
+            plant_model = plant_ic,
         )
     )
 
     # Model parameters
     p = (
         gamma = adapt_gain,
-        plant_fun = plant_fun
+        plant_fun = plant_fun,
     )
 
     sim_fun = apply_inputs(system!; r = input_signal, n = deterministic_noise)
@@ -172,9 +175,14 @@ function simulate(plant_fun, plant_ic;
     )
 
     # Parameter estimate tracking
-    bottom = plot(sol,
-        vars = Symbol.([
-            "feedback_loop.parameter_estimates.θr", "feedback_loop.parameter_estimates.θy"]))
+    bottom = plot(
+        sol,
+        vars = Symbol.(
+            [
+                "feedback_loop.parameter_estimates.θr", "feedback_loop.parameter_estimates.θy",
+            ]
+        )
+    )
     plot!(
         bottom,
         [tspan...], [θ_truth.r θ_truth.y; θ_truth.r θ_truth.y],
@@ -184,8 +192,10 @@ function simulate(plant_fun, plant_ic;
     )
 
     # Combine both plots
-    plot(top, bottom, layout = (2, 1), size = (800, 800))
+    return plot(top, bottom, layout = (2, 1), size = (800, 800))
 end
 
-simulate(truth_sim!, truth_ic; input_signal = 2.0,
-    deterministic_noise = (x, p, t)->0.5sin(16.1t), noise_param = nothing)
+simulate(
+    truth_sim!, truth_ic; input_signal = 2.0,
+    deterministic_noise = (x, p, t) -> 0.5sin(16.1t), noise_param = nothing
+)

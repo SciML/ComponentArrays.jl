@@ -33,7 +33,8 @@ julia> collect(x)
 ```
 """
 struct ComponentArray{
-    T, N, A <: AbstractArray{T, N}, Axes <: Tuple{Vararg{AbstractAxis}}} <: DenseArray{T, N}
+        T, N, A <: AbstractArray{T, N}, Axes <: Tuple{Vararg{AbstractAxis}},
+    } <: DenseArray{T, N}
     data::A
     axes::Axes
 end
@@ -41,14 +42,15 @@ end
 # Entry from type (used for broadcasting)
 ComponentArray{Axes}(data) where {Axes} = ComponentArray(data, getaxes(Axes)...)
 function ComponentArray(::UndefInitializer, ax::Axes) where {Axes <: Tuple}
-    ComponentArray(similar(Array{Float64}, last_index.(ax)), ax...)
+    return ComponentArray(similar(Array{Float64}, last_index.(ax)), ax...)
 end
 function ComponentArray{A}(::UndefInitializer, ax::Axes) where {
-        A <: AbstractArray, Axes <: Tuple}
-    ComponentArray(similar(A, last_index.(ax)), ax...)
+        A <: AbstractArray, Axes <: Tuple,
+    }
+    return ComponentArray(similar(A, last_index.(ax)), ax...)
 end
 function ComponentArray{T}(::UndefInitializer, ax::Axes) where {T, Axes <: Tuple}
-    ComponentArray(similar(Array{T}, last_index.(ax)), ax...)
+    return ComponentArray(similar(Array{T}, last_index.(ax)), ax...)
 end
 
 # Entry from data array and AbstractAxis types dispatches to correct shapes and partitions
@@ -57,7 +59,7 @@ end
 ComponentArray(data, ::Union{FlatAxis, Shaped1DAxis}...) = data
 ComponentArray(data, ax::NotShapedOrPartitionedAxis...) = ComponentArray(data, ax)
 function ComponentArray(data, ax::NotPartitionedAxis...)
-    ComponentArray(maybe_reshape(data, ax...), unshape.(ax)...)
+    return ComponentArray(maybe_reshape(data, ax...), unshape.(ax)...)
 end
 function ComponentArray(data, ax::AbstractAxis...)
     part_axs = filter_by_type(PartitionedAxis, ax...)
@@ -79,9 +81,11 @@ function Adapt.adapt_structure(to, x::ComponentArray)
     return ComponentArray(data, getaxes(x))
 end
 
-function Adapt.adapt_storage(::Type{ComponentArray{T, N, A, Ax}},
-        xs::AT) where {T, N, A, Ax, AT <: AbstractArray}
-    Adapt.adapt_storage(A, xs)
+function Adapt.adapt_storage(
+        ::Type{ComponentArray{T, N, A, Ax}},
+        xs::AT
+    ) where {T, N, A, Ax, AT <: AbstractArray}
+    return Adapt.adapt_storage(A, xs)
 end
 
 Adapt.parent_type(::Type{ComponentArray{T, N, A, Ax}}) where {T, N, A, Ax} = A
@@ -90,7 +94,7 @@ Adapt.parent_type(::Type{ComponentArray{T, N, A, Ax}}) where {T, N, A, Ax} = A
 ComponentArray{T}(nt::NamedTuple) where {T} = ComponentArray(make_carray_args(T, nt)...)
 ComponentArray{T}(::NamedTuple{(), Tuple{}}) where {T} = ComponentArray(T[], (FlatAxis(),))
 function ComponentArray(nt::Union{NamedTuple, AbstractDict})
-    ComponentArray(make_carray_args(nt)...)
+    return ComponentArray(make_carray_args(nt)...)
 end
 ComponentArray(::NamedTuple{(), Tuple{}}) = ComponentArray(Any[], (FlatAxis(),))
 ComponentArray{T}(; kwargs...) where {T} = ComponentArray{T}((; kwargs...))
@@ -99,7 +103,7 @@ ComponentArray(; kwargs...) = ComponentArray((; kwargs...))
 ComponentArray(x::ComponentArray) = x
 ComponentArray{T}(x::ComponentArray) where {T} = T.(x)
 function (CA::Type{<:ComponentArray{T, N, A, Ax}})(x::ComponentArray) where {T, N, A, Ax}
-    ComponentArray(T.(getdata(x)), getaxes(x))
+    return ComponentArray(T.(getdata(x)), getaxes(x))
 end
 
 function fill_componentarray_ka! end # defined in extensions
@@ -125,7 +129,7 @@ function ComponentVector(data::AbstractArray, ax)
 end
 
 function ConstructionBase.setproperties(x::ComponentVector, patch::NamedTuple)
-    ComponentVector(x; patch...)
+    return ComponentVector(x; patch...)
 end
 
 # Add new fields to component Vector
@@ -154,7 +158,7 @@ ComponentMatrix{T}(x::ComponentMatrix) where {T} = T.(x)
 
 ComponentMatrix() = ComponentMatrix(Array{Any}(undef, 0, 0), (FlatAxis(), FlatAxis()))
 function ComponentMatrix{T}() where {T}
-    ComponentMatrix(Array{T}(undef, 0, 0), (FlatAxis(), FlatAxis()))
+    return ComponentMatrix(Array{T}(undef, 0, 0), (FlatAxis(), FlatAxis()))
 end
 
 const CArray = ComponentArray
@@ -163,22 +167,29 @@ const CMatrix = ComponentMatrix
 
 const AdjOrTrans{T, A} = Union{Adjoint{T, A}, Transpose{T, A}}
 const AdjOrTransComponentArray{
-    T, A} = Union{Adjoint{T, A}, Transpose{T, A}} where {A <: ComponentArray}
+    T, A,
+} = Union{Adjoint{T, A}, Transpose{T, A}} where {A <: ComponentArray}
 const AdjOrTransComponentVector{T} = Union{
-    Adjoint{T, A}, Transpose{T, A}} where {A <: ComponentVector}
+    Adjoint{T, A}, Transpose{T, A},
+} where {A <: ComponentVector}
 const AdjOrTransComponentMatrix{T} = Union{
-    Adjoint{T, A}, Transpose{T, A}} where {A <: ComponentMatrix}
+    Adjoint{T, A}, Transpose{T, A},
+} where {A <: ComponentMatrix}
 
 const ComponentVecOrMat{T} = Union{ComponentVector{T}, ComponentMatrix{T}} where {T}
 const AdjOrTransComponentVecOrMat{T} = AdjOrTrans{T, <:ComponentVecOrMat} where {T}
 const AbstractComponentArray{T} = Union{
-    ComponentArray{T}, AdjOrTransComponentArray{T}} where {T}
+    ComponentArray{T}, AdjOrTransComponentArray{T},
+} where {T}
 const AbstractComponentVecOrMat{T} = Union{
-    ComponentVecOrMat{T}, AdjOrTransComponentVecOrMat{T}} where {T}
+    ComponentVecOrMat{T}, AdjOrTransComponentVecOrMat{T},
+} where {T}
 const AbstractComponentVector{T} = Union{
-    ComponentVector{T}, AdjOrTransComponentVector{T}} where {T}
+    ComponentVector{T}, AdjOrTransComponentVector{T},
+} where {T}
 const AbstractComponentMatrix{T} = Union{
-    ComponentMatrix{T}, AdjOrTransComponentMatrix{T}} where {T}
+    ComponentMatrix{T}, AdjOrTransComponentMatrix{T},
+} where {T}
 
 ## Constructor helpers
 allocate_numeric_container(x) = allocate_numeric_container(recursive_eltype(x))
@@ -190,7 +201,7 @@ make_carray_args(::NamedTuple{(), Tuple{}}) = (Any[], FlatAxis())
 make_carray_args(::Type{T}, ::NamedTuple{(), Tuple{}}) where {T} = (T[], FlatAxis())
 function make_carray_args(nt)
     data, ax = make_carray_args(Vector, nt)
-    data = length(data)==1 ? [data[1]] : map(identity, data)
+    data = length(data) == 1 ? [data[1]] : map(identity, data)
     return (data, ax)
 end
 make_carray_args(::Type{T}, nt) where {T} = make_carray_args(Vector{T}, nt)
@@ -204,14 +215,16 @@ end
 function make_idx(data, nt::Union{NamedTuple, AbstractDict}, last_val)
     len = recursive_length(nt)
     lv = Ref(0) # workaround for https://github.com/JuliaLang/julia/issues/15276
-    kvs = (; (
-        k => begin
-            inds = make_idx(data, v, lv[])[2]
-            lv[] = last_index(inds)
-            inds
-        end
-    for (k, v) in pairs(nt)
-    )...)
+    kvs = (;
+        (
+            k => begin
+                    inds = make_idx(data, v, lv[])[2]
+                    lv[] = last_index(inds)
+                    inds
+                end
+                for (k, v) in pairs(nt)
+        )...,
+    )
     return (data, ViewAxis(last_index(last_val) .+ (1:len), kvs))
 end
 function make_idx(data, nt::NamedTuple{(), Tuple{}}, last_val)
@@ -225,15 +238,15 @@ function make_idx(data, pair::Pair, last_val)
 end
 make_idx(data, x, last_val) = (
     push!(data, x),
-    ViewAxis(last_index(last_val) + 1)
+    ViewAxis(last_index(last_val) + 1),
 )
 function make_idx(data, x::ComponentVector, last_val)
-    (
+    return (
         append!(data, x),
         ViewAxis(
             last_index(last_val) .+ (1:length(x)),
             getaxes(x)[1]
-        )
+        ),
     )
 end
 function make_idx(data, x::AbstractArray, last_val)
@@ -241,8 +254,13 @@ function make_idx(data, x::AbstractArray, last_val)
     out = last_index(last_val) .+ (1:length(x))
     return (data, ViewAxis(out, ShapedAxis(size(x))))
 end
-function make_idx(data, x::A, last_val) where {A <: AbstractArray{<:Union{
-        NamedTuple, AbstractArray}}}
+function make_idx(data, x::A, last_val) where {
+        A <: AbstractArray{
+            <:Union{
+                NamedTuple, AbstractArray,
+            },
+        },
+    }
     len = recursive_length(x)
     elem_len = len ÷ length(x)
     if eltype(x) |> isconcretetype && all(elem -> recursive_length(elem) == elem_len, x)
@@ -258,7 +276,7 @@ function make_idx(data, x::A, last_val) where {A <: AbstractArray{<:Union{
                     elem_len,
                     indexmap(out)
                 )
-            )
+            ),
         )
     else
         error("Only homogeneous arrays are allowed.")
@@ -270,7 +288,7 @@ end
 
 #TODO: Make all internal function names start with underscores
 function _maybe_add_field(x, pair)
-    haskey(x, pair.first) ? _update_field(x, pair) : _add_field(x, pair)
+    return haskey(x, pair.first) ? _update_field(x, pair) : _add_field(x, pair)
 end
 function _add_field(x, pair)
     data = copy(getdata(x))
@@ -294,7 +312,7 @@ function maybe_reshape(data, axs::AbstractAxis...)
 end
 
 function Base.reshape(A::AbstractArray, axs::Tuple{CombinedAxis, Vararg{CombinedAxis}})
-    reshape(A, _array_axis.(axs))
+    return reshape(A, _array_axis.(axs))
 end
 
 # Recurse through nested ViewAxis types to find the last index
@@ -353,20 +371,38 @@ julia> getaxes(ca)
 ```
 """
 @inline getaxes(x::ComponentArray) = getfield(x, :axes)
-@inline getaxes(x::AdjOrTrans{
-    T, <:ComponentVector}) where {T} = (FlatAxis(), getaxes(x.parent)[1])
+@inline getaxes(
+    x::AdjOrTrans{
+        T, <:ComponentVector,
+    }
+) where {T} = (FlatAxis(), getaxes(x.parent)[1])
 @inline getaxes(x::AdjOrTrans{T, <:ComponentMatrix}) where {T} = reverse(getaxes(x.parent))
 
-@inline getaxes(::Type{<:ComponentArray{
-    T, N, A, Axes}}) where {T, N, A, Axes} = map(x->x(), (Axes.types...,))
-@inline getaxes(::Type{<:AdjOrTrans{
-    T, CA}}) where {T, CA <: ComponentVector} = (FlatAxis(), getaxes(CA)[1]) |> typeof
-@inline getaxes(::Type{<:AdjOrTrans{
-    T, CA}}) where {T, CA <: ComponentMatrix} = reverse(getaxes(CA)) |> typeof
+@inline getaxes(
+    ::Type{
+        <:ComponentArray{
+            T, N, A, Axes,
+        },
+    }
+) where {T, N, A, Axes} = map(x -> x(), (Axes.types...,))
+@inline getaxes(
+    ::Type{
+        <:AdjOrTrans{
+            T, CA,
+        },
+    }
+) where {T, CA <: ComponentVector} = (FlatAxis(), getaxes(CA)[1]) |> typeof
+@inline getaxes(
+    ::Type{
+        <:AdjOrTrans{
+            T, CA,
+        },
+    }
+) where {T, CA <: ComponentMatrix} = reverse(getaxes(CA)) |> typeof
 
 ## Field access through these functions to reserve dot-getting for keys
 @inline getaxes(x::VarAxes) = getaxes(typeof(x))
-@inline getaxes(Ax::Type{Axes}) where {Axes <: VarAxes} = map(x->x(), (Ax.types...,))
+@inline getaxes(Ax::Type{Axes}) where {Axes <: VarAxes} = map(x -> x(), (Ax.types...,))
 
 getaxes(x) = ()
 

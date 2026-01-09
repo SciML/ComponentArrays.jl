@@ -17,9 +17,10 @@ makedocs(;
         "Examples" => [
             "examples/DiffEqFlux.md",
             "examples/adaptive_control.md",
-            "examples/ODE_jac.md"
+            "examples/ODE_jac.md",
+            "examples/coulomb_control.md",
         ],
-        "API" => "api.md"
+        "API" => "api.md",
     ],
     repo = GitHub("SciML/ComponentArrays.jl"),
     sitename = "ComponentArrays.jl",
