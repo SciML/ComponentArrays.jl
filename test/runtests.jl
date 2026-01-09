@@ -1,3 +1,24 @@
+using Pkg
+using Test
+
+const GROUP = get(ENV, "GROUP", "All")
+
+function activate_nopre_env()
+    Pkg.activate("nopre")
+    Pkg.develop(PackageSpec(path = dirname(@__DIR__)))
+    Pkg.instantiate()
+end
+
+# Handle nopre group separately - requires its own environment
+if GROUP == "nopre"
+    activate_nopre_env()
+    @testset "JET" begin
+        include("nopre/jet_tests.jl")
+    end
+    exit(0)  # Exit after nopre tests
+end
+
+# Main test group (GROUP == "All" or default)
 using ComponentArrays
 using BenchmarkTools
 using ForwardDiff
@@ -7,7 +28,6 @@ using LabelledArrays
 using LinearAlgebra
 using StaticArrays
 using OffsetArrays
-using Test
 using Unitful
 using Functors
 
@@ -1003,8 +1023,4 @@ end
 
 @testset "Reactant" begin
     include("reactant_tests.jl")
-end
-
-@testset "JET" begin
-    include("jet_tests.jl")
 end
