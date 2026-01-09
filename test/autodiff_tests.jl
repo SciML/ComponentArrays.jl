@@ -28,8 +28,8 @@ truth = ComponentArray(a = [32, 48], x = 156)
     zygote_full = Zygote.gradient(F_, ca)[1]
     @test zygote_full ≈ truth
 
-    @test ComponentArray(x = 4.0,) ≈ Zygote.gradient(ComponentArray(x = 2,)) do c
-        (; c...,).x^2
+    @test ComponentArray(x = 4.0) ≈ Zygote.gradient(ComponentArray(x = 2)) do c
+        (; c...).x^2
     end[1]
 
     # Issue #148
@@ -131,5 +131,5 @@ end
     ps = ComponentArray(; a = rand(2), b = (; c = rand(2)))
     ps_tracked = Tracker.param(ps)
     @test ArrayInterface.restructure(ps, ps_tracked) isa
-          ComponentVector{<:Any, <:Tracker.TrackedArray}
+        ComponentVector{<:Any, <:Tracker.TrackedArray}
 end

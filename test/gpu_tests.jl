@@ -11,13 +11,13 @@ jlca = ComponentArray(jla, Axis(a = 1:2, b = 3:4))
     @test getdata(map(identity, jlca)) isa JLArray
     @test all(==(0), map(-, jlca, jla))
     @test all(map(-, jlca, jlca) .== 0)
-    @test all(==(0), map(-, jla, jlca)) broken=(pkgversion(JLArrays.GPUArrays) ≥ v"11")
+    @test all(==(0), map(-, jla, jlca)) broken = (pkgversion(JLArrays.GPUArrays) ≥ v"11")
 
     @test any(==(1), jlca)
     @test count(>(2), jlca) == 2
 
     # Make sure mapreducing multiple arrays works
-    @test mapreduce(==,+,jlca,jla) == 4
+    @test mapreduce(==, +, jlca, jla) == 4
     @test mapreduce(abs2, +, jlca) == 30
 
     @test all(map(sin, jlca) .== sin.(jlca) .== sin.(jla) .≈ sin.(1:4))
@@ -49,21 +49,21 @@ end
         @test rmul!(jlca3, 2) == ComponentArray(jla .* 2, Axis(a = 1:2, b = 3:4))
     end
     @testset "mul!" begin
-        A = jlca .* jlca';
-        @test_nowarn mul!(deepcopy(A), A, A, 1, 2);
-        @test_nowarn mul!(deepcopy(A), A', A', 1, 2);
-        @test_nowarn mul!(deepcopy(A), A', A, 1, 2);
-        @test_nowarn mul!(deepcopy(A), A, A', 1, 2);
-        @test_nowarn mul!(deepcopy(A), A, getdata(A'), 1, 2);
-        @test_nowarn mul!(deepcopy(A), getdata(A'), A, 1, 2);
-        @test_nowarn mul!(deepcopy(A), getdata(A'), getdata(A'), 1, 2);
-        @test_nowarn mul!(deepcopy(A), transpose(A), A, 1, 2);
-        @test_nowarn mul!(deepcopy(A), A, transpose(A), 1, 2);
-        @test_nowarn mul!(deepcopy(A), transpose(A), transpose(A), 1, 2);
-        @test_nowarn mul!(deepcopy(A), transpose(getdata(A)), A, 1, 2);
-        @test_nowarn mul!(deepcopy(A), A, transpose(getdata(A)), 1, 2);
-        @test_nowarn mul!(deepcopy(A), transpose(getdata(A)), transpose(getdata(A)), 1, 2);
-        @test_nowarn mul!(deepcopy(A), transpose(A), A', 1, 2);
-        @test_nowarn mul!(deepcopy(A), A', transpose(A), 1, 2);
+        A = jlca .* jlca'
+        @test_nowarn mul!(deepcopy(A), A, A, 1, 2)
+        @test_nowarn mul!(deepcopy(A), A', A', 1, 2)
+        @test_nowarn mul!(deepcopy(A), A', A, 1, 2)
+        @test_nowarn mul!(deepcopy(A), A, A', 1, 2)
+        @test_nowarn mul!(deepcopy(A), A, getdata(A'), 1, 2)
+        @test_nowarn mul!(deepcopy(A), getdata(A'), A, 1, 2)
+        @test_nowarn mul!(deepcopy(A), getdata(A'), getdata(A'), 1, 2)
+        @test_nowarn mul!(deepcopy(A), transpose(A), A, 1, 2)
+        @test_nowarn mul!(deepcopy(A), A, transpose(A), 1, 2)
+        @test_nowarn mul!(deepcopy(A), transpose(A), transpose(A), 1, 2)
+        @test_nowarn mul!(deepcopy(A), transpose(getdata(A)), A, 1, 2)
+        @test_nowarn mul!(deepcopy(A), A, transpose(getdata(A)), 1, 2)
+        @test_nowarn mul!(deepcopy(A), transpose(getdata(A)), transpose(getdata(A)), 1, 2)
+        @test_nowarn mul!(deepcopy(A), transpose(A), A', 1, 2)
+        @test_nowarn mul!(deepcopy(A), A', transpose(A), 1, 2)
     end
 end

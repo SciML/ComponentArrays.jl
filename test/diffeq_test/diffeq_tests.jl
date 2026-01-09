@@ -10,21 +10,21 @@ using Unitful
         y₁, y₂, y₃ = vars
         k₁, k₂, k₃ = p
         D = similar(vars)
-        D.y₁ = -k₁*y₁+k₃*y₂*y₃
-        D.y₂ = k₁*y₁-k₂*y₂^2-k₃*y₂*y₃
-        D.y₃ = k₂*y₂^2
+        D.y₁ = -k₁ * y₁ + k₃ * y₂ * y₃
+        D.y₂ = k₁ * y₁ - k₂ * y₂^2 - k₃ * y₂ * y₃
+        D.y₃ = k₂ * y₂^2
         return D
     end
     ic = ComponentArray(y₁ = 1.0, y₂ = 0.0, y₃ = 0.0)
-    prob = ODEProblem(rober, ic, (0.0, 1e11), (0.04, 3e7, 1e4))
+    prob = ODEProblem(rober, ic, (0.0, 1.0e11), (0.04, 3.0e7, 1.0e4))
     sol = solve(prob, Rosenbrock23())
     @test sol[1] isa ComponentArray
 end
 
 @testset "Issue 53" begin
     x0 = ComponentArray(x = ones(10))
-    prob = ODEProblem((u, p, t)->u, x0, (0.0, 1.0))
-    sol = solve(prob, CVODE_BDF(linear_solver = :BCG), reltol = 1e-15, abstol = 1e-15)
+    prob = ODEProblem((u, p, t) -> u, x0, (0.0, 1.0))
+    sol = solve(prob, CVODE_BDF(linear_solver = :BCG), reltol = 1.0e-15, abstol = 1.0e-15)
     @test sol(1)[1] ≈ exp(1)
 end
 
@@ -65,34 +65,34 @@ end
 
         p = [0.1, 0.1]
 
-        lu_0 = @LArray fill(1000.0, 2*n) (x = (1:n), y = ((n + 1):(2 * n)))
+        lu_0 = @LArray fill(1000.0, 2 * n) (x = (1:n), y = ((n + 1):(2 * n)))
         cu_0 = ComponentArray(x = fill(1000.0, n), y = fill(1000.0, n))
 
         lprob1 = ODEProblem(f1, lu_0, (0, 100.0), p)
         cprob1 = ODEProblem(f1, cu_0, (0, 100.0), p)
 
-        solve(lprob1, Rodas5());
-        solve(lprob1, Rodas5(autodiff = false));
-        solve(cprob1, Rodas5());
-        solve(cprob1, Rodas5(autodiff = false));
+        solve(lprob1, Rodas5())
+        solve(lprob1, Rodas5(autodiff = false))
+        solve(cprob1, Rodas5())
+        solve(cprob1, Rodas5(autodiff = false))
 
-        ltime1 = @elapsed lsol1 = solve(lprob1, Rodas5());
-        ltime2 = @elapsed lsol2 = solve(lprob1, Rodas5(autodiff = false));
-        ctime1 = @elapsed csol1 = solve(cprob1, Rodas5());
-        ctime2 = @elapsed csol2 = solve(cprob1, Rodas5(autodiff = false));
+        ltime1 = @elapsed lsol1 = solve(lprob1, Rodas5())
+        ltime2 = @elapsed lsol2 = solve(lprob1, Rodas5(autodiff = false))
+        ctime1 = @elapsed csol1 = solve(cprob1, Rodas5())
+        ctime2 = @elapsed csol2 = solve(cprob1, Rodas5(autodiff = false))
 
-        @test (ctime1 - ltime1)/ltime1 < 0.05
-        @test (ctime2 - ltime2)/ltime2 < 0.05
+        @test (ctime1 - ltime1) / ltime1 < 0.05
+        @test (ctime2 - ltime2) / ltime2 < 0.05
     end
 
     @testset "Slack Issue 2021-2-19" begin
         nknots = 100
-        h² = (1.0/(nknots+1))^2
+        h² = (1.0 / (nknots + 1))^2
         function heat_conduction(du, u, p, t)
             u₃ = @view u[3:end]
             u₂ = @view u[2:(end - 1)]
             u₁ = @view u[1:(end - 2)]
-            @. du[2:(end - 1)] = (u₃ - 2*u₂ + u₁)/h²
+            @. du[2:(end - 1)] = (u₃ - 2 * u₂ + u₁) / h²
             nothing
         end
 
@@ -113,7 +113,7 @@ end
         ltime = @elapsed solve(lprob, Tsit5(), saveat = 0.2)
         time = @elapsed solve(prob, Tsit5(), saveat = 0.2)
 
-        @test (ctime - time)/time < 0.1
-        @test (ctime - ltime)/ltime < 0.05
+        @test (ctime - time) / time < 0.1
+        @test (ctime - ltime) / ltime < 0.05
     end
 end

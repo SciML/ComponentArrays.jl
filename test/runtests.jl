@@ -39,11 +39,18 @@ r2v(r::AbstractUnitRange) = ViewAxis(r, ShapedAxis(size(r)))
 ## Test setup
 c = (a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45])
 nt = (a = 100, b = [4, 1.3], c = c)
-nt2 = (a = 5, b = [(a = (a = 20, b = 1), b = 0), (a = (a = 33, b = 1), b = 0)],
-    c = (a = (a = 2, b = [1, 2]), b = [1.0 2.0; 5 6]))
+nt2 = (
+    a = 5, b = [(a = (a = 20, b = 1), b = 0), (a = (a = 33, b = 1), b = 0)],
+    c = (a = (a = 2, b = [1, 2]), b = [1.0 2.0; 5 6]),
+)
 
-ax = Axis(a = 1, b = r2v(2:3), c = ViewAxis(4:10, (
-    a = ViewAxis(1:3, (a = 1, b = r2v(2:3))), b = r2v(4:7))))
+ax = Axis(
+    a = 1, b = r2v(2:3), c = ViewAxis(
+        4:10, (
+            a = ViewAxis(1:3, (a = 1, b = r2v(2:3))), b = r2v(4:7),
+        )
+    )
+)
 ax_c = (a = ViewAxis(1:3, (a = 1, b = r2v(2:3))), b = r2v(4:7))
 
 a = Float64[100, 4, 1.3, 1, 1, 4.4, 0.4, 2, 1, 45]
@@ -84,14 +91,17 @@ end
     @test_deprecated fastindices(:a, Val(:b)) == (Val(:a), Val(:b))
 
     @test collect(ComponentArrays.partition(collect(1:12), 3)) ==
-          [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
     @test size(collect(ComponentArrays.partition(zeros(2, 2, 2), 1, 2, 2))[2, 1, 1]) ==
-          (1, 2, 2)
+        (1, 2, 2)
 end
 
 @testset "Construction" begin
-    @test ca == ComponentArray(a = 100, b = [4, 1.3], c = (
-        a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45]))
+    @test ca == ComponentArray(
+        a = 100, b = [4, 1.3], c = (
+            a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45],
+        )
+    )
     @test ca_Float32 == ComponentArray(Float32.(a), ax)
     @test eltype(ComponentArray{ForwardDiff.Dual}(nt)) == ForwardDiff.Dual
     @test ca_composed.b isa ComponentArray
@@ -108,8 +118,11 @@ end
     @test ComponentArray(dict1) isa ComponentArray
     @test ComponentArray(dict2).b isa ComponentArray
 
-    @test ca == ComponentVector(a = 100, b = [4, 1.3], c = (
-        a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45]))
+    @test ca == ComponentVector(
+        a = 100, b = [4, 1.3], c = (
+            a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45],
+        )
+    )
     @test cmat == ComponentMatrix(a .* a', ax, ax)
     @test_throws DimensionMismatch ComponentVector(sq_mat, ax)
     @test_throws DimensionMismatch ComponentMatrix(rand(11, 11, 11), ax, ax)
@@ -124,7 +137,7 @@ end
     # Issue #24
     @test ComponentVector(a = 1, b = 2.0f0) == ComponentVector{Float32}(a = 1.0, b = 2.0)
     @test ComponentVector(a = 1, b = 2 + im) ==
-          ComponentVector{Complex{Int64}}(a = 1 + 0im, b = 2 + 1im)
+        ComponentVector{Complex{Int64}}(a = 1 + 0im, b = 2 + 1im)
 
     # Issue #23
     sz = size(ca)
@@ -170,7 +183,7 @@ end
         @test ComponentArray(a = T[], b = T[]) == ComponentVector{T}(a = T[], b = T[])
         @test ComponentArray(a = T[], b = (;)) == ComponentVector{T}(a = T[], b = T[])
         @test ComponentArray(a = Any[one(Int32)], b = T[]) ==
-              ComponentVector{T}(a = [one(T)], b = T[])
+            ComponentVector{T}(a = [one(T)], b = T[])
     end
     @test ComponentArray(NamedTuple()) == ComponentVector{Any}()
     @test ComponentArray(a = []).a == []
@@ -410,25 +423,29 @@ end
         @testset "ComponentIndex" begin
             ax = getaxes(ca)[1]
             @test ax[:a] == ax[1] ==
-                  ComponentArrays.ComponentIndex(1, ComponentArrays.NullAxis())
+                ComponentArrays.ComponentIndex(1, ComponentArrays.NullAxis())
             @test ax[:c] == ax[3:4] ==
-                  ComponentArrays.ComponentIndex(3:4, ShapedAxis(size(3:4)))
+                ComponentArrays.ComponentIndex(3:4, ShapedAxis(size(3:4)))
             @test ax[:d] == ComponentArrays.ComponentIndex(5:8, Axis(a = r2v(1:3), b = 4))
             @test ax[(:a, :c)] == ax[[:a, :c]] ==
-                  ComponentArrays.ComponentIndex([1, 3, 4], Axis(a = 1, c = r2v(2:3)))
+                ComponentArrays.ComponentIndex([1, 3, 4], Axis(a = 1, c = r2v(2:3)))
             ax2 = getaxes(ca2)[1]
             @test ax2[(:a, :c)] == ax2[[:a, :c]] ==
-                  ComponentArrays.ComponentIndex(
-                      [1, 3:8...], Axis(a = 1, c = ViewAxis(2:7, ShapedAxis((2, 3)))))
+                ComponentArrays.ComponentIndex(
+                    [1, 3:8...], Axis(a = 1, c = ViewAxis(2:7, ShapedAxis((2, 3))))
+                )
 
             @test length(ComponentArrays.ComponentIndex(1, ComponentArrays.NullAxis())) == 1
             @test length(ComponentArrays.ComponentIndex(3:4, ShapedAxis(size(3:4)))) == 2
             @test length(ComponentArrays.ComponentIndex(5:8, Axis(a = r2v(1:3), b = 4))) ==
-                  4
+                4
             @test length(ComponentArrays.ComponentIndex([1, 3, 4], Axis(a = 1, c = r2v(2:3)))) ==
-                  3
-            @test length(ComponentArrays.ComponentIndex(
-                [1, 3:8...], Axis(a = 1, c = ViewAxis(2:7, ShapedAxis((2, 3)))))) == 7
+                3
+            @test length(
+                ComponentArrays.ComponentIndex(
+                    [1, 3:8...], Axis(a = 1, c = ViewAxis(2:7, ShapedAxis((2, 3))))
+                )
+            ) == 7
         end
 
         @testset "KeepIndex" begin
@@ -436,25 +453,25 @@ end
             @test ca[KeepIndex(:b)] == ca[KeepIndex(2)] == ComponentArray(b = 2)
             @test ca[KeepIndex(:c)] == ca[KeepIndex(3:4)] == ComponentArray(c = [3, 4])
             @test ca[KeepIndex(:d)] == ca[KeepIndex(5:8)] ==
-                  ComponentArray(d = (a = [5, 6, 7], b = 8))
+                ComponentArray(d = (a = [5, 6, 7], b = 8))
 
             @test ca[KeepIndex(1:2)] == ComponentArray(a = 1, b = 2)
             @test ca[KeepIndex(1:3)] == ComponentArray([1, 2, 3], Axis(a = 1, b = 2)) # Drops c axis
             @test ca[KeepIndex(2:5)] ==
-                  ComponentArray([2, 3, 4, 5], Axis(b = 1, c = r2v(2:3)))
+                ComponentArray([2, 3, 4, 5], Axis(b = 1, c = r2v(2:3)))
             @test ca[KeepIndex(3:end)] ==
-                  ComponentArray(c = [3, 4], d = (a = [5, 6, 7], b = 8))
+                ComponentArray(c = [3, 4], d = (a = [5, 6, 7], b = 8))
 
             @test ca[KeepIndex(:)] == ca
 
             @test cmat[KeepIndex(:a), KeepIndex(:b)] ==
-                  ComponentArray(fill(2, 1, 1), Axis(a = 1), Axis(b = 1))
+                ComponentArray(fill(2, 1, 1), Axis(a = 1), Axis(b = 1))
             @test cmat[KeepIndex(:), KeepIndex(:c)] ==
-                  ComponentArray((1:8) * (3:4)', getaxes(ca)[1], Axis(c = r2v(1:2)))
+                ComponentArray((1:8) * (3:4)', getaxes(ca)[1], Axis(c = r2v(1:2)))
             @test cmat[KeepIndex(2:5), 1:2] ==
-                  ComponentArray((2:5) * (1:2)', Axis(b = 1, c = r2v(2:3)), ShapedAxis(size(1:2)))
+                ComponentArray((2:5) * (1:2)', Axis(b = 1, c = r2v(2:3)), ShapedAxis(size(1:2)))
             @test cmat[KeepIndex(2), KeepIndex(3)] ==
-                  ComponentArray(fill(2 * 3, 1, 1), Axis(b = 1), FlatAxis())
+                ComponentArray(fill(2 * 3, 1, 1), Axis(b = 1), FlatAxis())
             @test cmat[KeepIndex(2), 3] == ComponentArray(b = 2 * 3)
         end
     end
@@ -610,10 +627,12 @@ end
     @test ldiv!(tempmat, lu(cmat + I), cmat) isa ComponentMatrix
     @test ldiv!(getdata(tempmat), lu(cmat + I), cmat) isa AbstractMatrix
 
-    c = (a = 2, b = [1, 2]);
+    c = (a = 2, b = [1, 2])
     x = ComponentArray(
         a = 5, b = [
-            (a = 20.0, b = 3.0), (a = 33.0, b = 2.0), (a = 44.0, b = 3.0)], c = c)
+            (a = 20.0, b = 3.0), (a = 33.0, b = 2.0), (a = 44.0, b = 3.0),
+        ], c = c
+    )
     @test ldiv!(rand(10), Diagonal(x), x) isa Vector
 
     vca2 = vcat(ca2', ca2')
@@ -693,7 +712,7 @@ end
     @test getaxes((s1_D * s2_D) * in2) == getaxes(s1_D * (s2_D * in2)) == (Axis(y1 = 1),)
     @test getaxes((s2_D * s1_D) * in1) == getaxes(s2_D * (s1_D * in1)) == (Axis(y2 = 1),)
     @test getaxes(out1' * (s1_D * s2_D)) == getaxes(transpose(out1) * (s1_D * s2_D)) ==
-          (FlatAxis(), Axis(u2 = 1))
+        (FlatAxis(), Axis(u2 = 1))
 
     @test ComponentArrays.ArrayInterface.lu_instance(cmat).factors isa ComponentMatrix
     @test ComponentArrays.ArrayInterface.parent_type(cmat) === Matrix{Float64}
@@ -735,14 +754,17 @@ end
         "c.b[1,1]",
         "c.b[2,1]",
         "c.b[1,2]",
-        "c.b[2,2]"
+        "c.b[2,2]",
     ]
     @test label2index(ca2, "c.b") == collect(11:14)
 
     # Issue #74
-    lab2 = labels(ComponentArray(
-        a = 1, aa = ones(2), ab = [(a = 1, aa = ones(2)), (a = 1, aa = ones(2))],
-        ac = (a = 1, ab = ones(2, 2))))
+    lab2 = labels(
+        ComponentArray(
+            a = 1, aa = ones(2), ab = [(a = 1, aa = ones(2)), (a = 1, aa = ones(2))],
+            ac = (a = 1, ab = ones(2, 2))
+        )
+    )
     @test label2index(lab2, "a") == [1]
     @test label2index(lab2, "aa") == collect(2:3)
     @test label2index(lab2, "ab") == collect(4:9)
@@ -757,7 +779,7 @@ end
     @test sum(abs2, cmat) == sum(abs2, getdata(cmat))
 
     # Issue #40
-    r0 = [1131.340, -2282.343, 6672.423]u"km"
+    r0 = [1131.34, -2282.343, 6672.423]u"km"
     v0 = [-5.64305, 4.30333, 2.42879]u"km/s"
     rv0 = ComponentArray(r = r0, v = v0)
     zrv0 = zero(rv0)
@@ -882,20 +904,20 @@ end
     @test all(Xstack3_d1[4, :z] .== Xstack3_noca_d1[4, :])
 
     # Issue #254, map then stack.
-    Xstack4_d1 = stack(x -> ComponentArray(a = x, b = [x+1, x+2]), [5 6; 7 8]; dims = 1)  # map then stack
-    Xstack4_noca_d1 = stack(x -> [x, x+1, x+2], [5 6; 7 8]; dims = 1)  # map then stack
+    Xstack4_d1 = stack(x -> ComponentArray(a = x, b = [x + 1, x + 2]), [5 6; 7 8]; dims = 1)  # map then stack
+    Xstack4_noca_d1 = stack(x -> [x, x + 1, x + 2], [5 6; 7 8]; dims = 1)  # map then stack
     @test all(Xstack4_d1 .== Xstack4_noca_d1)
     @test all(Xstack4_d1[:, :a] .== Xstack4_noca_d1[:, 1])
     @test all(Xstack4_d1[:, :b] .== Xstack4_noca_d1[:, 2:3])
 
-    Xstack4_d2 = stack(x -> ComponentArray(a = x, b = [x+1, x+2]), [5 6; 7 8]; dims = 2)  # map then stack
-    Xstack4_noca_d2 = stack(x -> [x, x+1, x+2], [5 6; 7 8]; dims = 2)  # map then stack
+    Xstack4_d2 = stack(x -> ComponentArray(a = x, b = [x + 1, x + 2]), [5 6; 7 8]; dims = 2)  # map then stack
+    Xstack4_noca_d2 = stack(x -> [x, x + 1, x + 2], [5 6; 7 8]; dims = 2)  # map then stack
     @test all(Xstack4_d2 .== Xstack4_noca_d2)
     @test all(Xstack4_d2[:a, :] .== Xstack4_noca_d2[1, :])
     @test all(Xstack4_d2[:b, :] .== Xstack4_noca_d2[2:3, :])
 
-    Xstack4_dcolon = stack(x -> ComponentArray(a = x, b = [x+1, x+2]), [5 6; 7 8]; dims = :)  # map then stack
-    Xstack4_noca_dcolon = stack(x -> [x, x+1, x+2], [5 6; 7 8]; dims = :)  # map then stack
+    Xstack4_dcolon = stack(x -> ComponentArray(a = x, b = [x + 1, x + 2]), [5 6; 7 8]; dims = :)  # map then stack
+    Xstack4_noca_dcolon = stack(x -> [x, x + 1, x + 2], [5 6; 7 8]; dims = :)  # map then stack
     @test all(Xstack4_dcolon .== Xstack4_noca_dcolon)
     @test all(Xstack4_dcolon[:a, :, :] .== Xstack4_noca_dcolon[1, :, :])
     @test all(Xstack4_dcolon[:b, :, :] .== Xstack4_noca_dcolon[2:3, :, :])
@@ -924,7 +946,7 @@ end
             idx::Int,
             ::ComponentVector{A, B, <:Tuple{<:Axis{NT}}},
             component_name::Symbol
-    ) where {A, B, NT}
+        ) where {A, B, NT}
         for (comp, range) in pairs(NT)
             if comp == component_name
                 return range[idx]

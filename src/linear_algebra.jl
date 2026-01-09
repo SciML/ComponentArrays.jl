@@ -38,7 +38,8 @@ for op in [:*, :\, :/]
                 return $adj(ComponentArray(cᵀ', ax2))
             end
             function Base.$op(A::$Adj{T, <:CV}, B::CV) where {
-                    T <: Real, CV <: ComponentVector{T}}
+                    T <: Real, CV <: ComponentVector{T},
+                }
                 return $op(getdata(A), getdata(B))
             end
         end
@@ -60,5 +61,5 @@ function LinearAlgebra.axpby!(α::Number, x::ComponentArray, β::Number, y::Comp
 end
 
 function LinearAlgebra.ldiv!(B::AbstractVecOrMat, D::Diagonal{Float64, <:ComponentArray}, A::AbstractVecOrMat)
-    ldiv!(B, Diagonal(Vector(D.diag)), A)
+    return ldiv!(B, Diagonal(Vector(D.diag)), A)
 end

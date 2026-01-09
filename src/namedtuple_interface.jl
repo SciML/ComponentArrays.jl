@@ -1,10 +1,10 @@
 Base.hash(x::ComponentArray, h::UInt) = hash(keys(x), hash(getdata(x), h))
 
 function Base.:(==)(x::ComponentArray, y::ComponentArray)
-    getdata(x)==getdata(y) && getaxes(x)==getaxes(y)
+    return getdata(x) == getdata(y) && getaxes(x) == getaxes(y)
 end
-Base.:(==)(x::ComponentArray, y::AbstractArray) = getdata(x)==y && keys(x)==keys(y) # For equality with LabelledArrays
-Base.:(==)(x::AbstractArray, y::ComponentArray) = y==x
+Base.:(==)(x::ComponentArray, y::AbstractArray) = getdata(x) == y && keys(x) == keys(y) # For equality with LabelledArrays
+Base.:(==)(x::AbstractArray, y::ComponentArray) = y == x
 
 Base.keys(x::ComponentVector) = keys(indexmap(getaxes(x)[1]))
 
