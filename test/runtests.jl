@@ -1030,6 +1030,7 @@ end
 
 # Reactant doesn't support Julia 1.13+ yet
 # See: https://github.com/EnzymeAD/Reactant.jl/issues/1736
+# Tracking: https://github.com/SciML/ComponentArrays.jl/issues/328
 if VERSION < v"1.13.0-"
     @testset "Reactant" begin
         include("reactant_tests.jl")
