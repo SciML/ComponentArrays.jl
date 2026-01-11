@@ -6,7 +6,7 @@ const GROUP = get(ENV, "GROUP", "All")
 function activate_nopre_env()
     Pkg.activate("nopre")
     Pkg.develop(PackageSpec(path = dirname(@__DIR__)))
-    Pkg.instantiate()
+    return Pkg.instantiate()
 end
 
 # Handle nopre group separately - requires its own environment
@@ -1028,6 +1028,10 @@ end
     include("gpu_tests.jl")
 end
 
-@testset "Reactant" begin
-    include("reactant_tests.jl")
+# Reactant doesn't support Julia 1.13+ yet
+# See: https://github.com/EnzymeAD/Reactant.jl/issues/1736
+if VERSION < v"1.13.0-"
+    @testset "Reactant" begin
+        include("reactant_tests.jl")
+    end
 end
