@@ -1036,3 +1036,7 @@ if VERSION < v"1.13.0-"
         include("reactant_tests.jl")
     end
 end
+
+@testset "ComponentArrays" begin
+    include("update_tests.jl")
+end
