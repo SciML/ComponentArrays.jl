@@ -1,7 +1,11 @@
 [deps]
+ComponentArrays = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-FastBroadcast = "7034ab61-46d4-4ed7-9d0f-46aef9175898"
 LabelledArrays = "2ee39098-c373-598a-b85f-a56591580800"
 Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[compat]
+LabelledArrays = "1.17.0"
+Unitful = "1.27.0"

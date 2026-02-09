@@ -1,4 +1,6 @@
+using ComponentArrays
 using JLArrays, LinearAlgebra
+using Test
 
 JLArrays.allowscalar(false)
 
