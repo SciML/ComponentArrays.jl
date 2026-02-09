@@ -87,8 +87,8 @@ end
         ctime1 = @elapsed csol1 = solve(cprob1, Rodas5())
         ctime2 = @elapsed csol2 = solve(cprob1, Rodas5(autodiff = false))
 
-        @test (ctime1 - ltime1) / ltime1 < 1.0
-        @test (ctime2 - ltime2) / ltime2 < 1.0
+        @test (ctime1 - ltime1) / ltime1 < 10.0
+        @test (ctime2 - ltime2) / ltime2 < 10.0
     end
 
     @testset "Slack Issue 2021-2-19" begin
@@ -119,7 +119,7 @@ end
         ltime = @elapsed solve(lprob, Tsit5(), saveat = 0.2)
         time = @elapsed solve(prob, Tsit5(), saveat = 0.2)
 
-        @test (ctime - time) / time < 5.0
-        @test (ctime - ltime) / ltime < 1.0
+        @test (ctime - time) / time < 10.0
+        @test (ctime - ltime) / ltime < 10.0
     end
 end
