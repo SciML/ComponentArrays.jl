@@ -437,3 +437,48 @@ julia> sum(prod(ca[k]) for k in valkeys(ca))
     return :($k)
 end
 valkeys(ca::ComponentVector) = valkeys(getaxes(ca)[1])
+
+"""
+    update_component_array(default::ComponentArray{T}, update::ComponentArray) where {T}
+
+Update a ComponentArray with values from another ComponentArray while preserving structure and type stability.
+Only matching entries are updated, allowing for partial updates of nested structures.
+
+# Arguments
+- `default::ComponentArray{T}`: The ComponentArray to update, serving as both template and target
+- `update::ComponentArray`: The ComponentArray containing the new values
+
+# Returns
+- A new ComponentArray with the same type and structure as `default`, updated with values from `update`
+
+# Example
+```julia
+default = ComponentArray(sig = (mu = 1.0, sigma = 2.0), bg = 3.0)
+update = ComponentArray(sig = (mu = 1.1,), bg = 3.3)
+result = update_component_array(default, update)
+# result.sig.mu == 1.1
+# result.sig.sigma == 2.0
+# result.bg == 3.3
+```
+"""
+function update_component_array(default::ComponentArray{T}, update::ComponentArray) where {T}
+    result = copy(default)
+
+    # Update matching fields using ComponentArray's natural indexing
+    for key in propertynames(update)
+        if hasproperty(default, key)
+            update_val = update[key]
+            default_val = default[key]
+
+            if default_val isa ComponentArray && update_val isa ComponentArray
+                # Recursively update nested ComponentArrays
+                result[key] = update_component_array(default_val, update_val)
+            else
+                # Direct update for leaf values
+                result[key] = update_val
+            end
+        end
+    end
+
+    return result
+end
