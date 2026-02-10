@@ -1,7 +1,7 @@
 using Pkg
 using Test
 
-const GROUP = get(ENV, "GROUP", "Core")
+const GROUP = get(ENV, "GROUP", "All")
 
 function activate_env(env_dir)
     Pkg.activate(env_dir)
@@ -9,7 +9,7 @@ function activate_env(env_dir)
     return Pkg.instantiate()
 end
 
-if GROUP == "Core"
+if GROUP == "All" || GROUP == "Core"
     @time @testset "Core" begin
         include("core_tests.jl")
     end
@@ -42,5 +42,5 @@ elseif GROUP == "nopre"
         include("nopre/aqua_tests.jl")
     end
 else
-    error("Unknown test group: $GROUP")
+    error("Unknown test group: $GROUP. Valid groups: All, Core, Autodiff, GPU, Downstream, Reactant, nopre")
 end
