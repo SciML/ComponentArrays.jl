@@ -1,3 +1,4 @@
+using ComponentArrays
 import FiniteDiff, ForwardDiff, ReverseDiff, Tracker, Zygote
 using Optimisers, ArrayInterface
 using Test

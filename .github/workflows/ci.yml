@@ -15,7 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         group:
-          - All
+          - Core
+          - Autodiff
+          - GPU
+          - Downstream
+          - Reactant
           - nopre
         version:
           - 'lts'
@@ -27,6 +31,10 @@ jobs:
           - x64
         exclude:
           - group: nopre
+            version: 'pre'
+          - group: Downstream
+            version: 'pre'
+          - group: Reactant
             version: 'pre'
     steps:
       - uses: actions/checkout@v6
