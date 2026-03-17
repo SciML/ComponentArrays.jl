@@ -1,5 +1,3 @@
-
-
 module ComponentArraysMooncakeExt
 
 using ComponentArrays, Mooncake
