@@ -1,5 +1,5 @@
 using ComponentArrays
-import FiniteDiff, ForwardDiff, ReverseDiff, Tracker, Zygote
+import ChainRulesCore, FiniteDiff, ForwardDiff, Mooncake, ReverseDiff, Tracker, Zygote
 using Optimisers, ArrayInterface
 using Test
 
@@ -133,4 +133,75 @@ end
     ps_tracked = Tracker.param(ps)
     @test ArrayInterface.restructure(ps, ps_tracked) isa
         ComponentVector{<:Any, <:Tracker.TrackedArray}
+end
+
+@testset "Mooncake" begin
+    # Native Mooncake rules — gradient through `getproperty` on a flat ComponentVector
+    # and on a ComponentVector with nested axes.
+    flat = ComponentArray(a = 1.0, b = 2.0, c = 3.0)
+    loss_flat(p) = sum(abs2, p.a) + 0.5 * p.b + p.c^2
+    let
+        cache = Mooncake.prepare_gradient_cache(loss_flat, flat)
+        _, g = Mooncake.value_and_gradient!!(cache, loss_flat, flat)
+        @test g[2].fields.data ≈ [2.0, 0.5, 6.0]
+    end
+
+    u0 = ComponentArray(x = 1.0, y = 2.0)
+    p_all = ComponentArray(a = 3.0, b = 4.0, c = 5.0)
+    nested = ComponentArray(; u0, p_all)
+    loss_nested(θ) = sum(abs2, θ.u0) + 0.5 * sum(abs2, θ.p_all)
+    let
+        cache = Mooncake.prepare_gradient_cache(loss_nested, nested)
+        _, g = Mooncake.value_and_gradient!!(cache, loss_nested, nested)
+        @test g[2].fields.data ≈ [2.0, 4.0, 3.0, 4.0, 5.0]
+    end
+
+    # @from_rrule round-trip — this is the path that fails without the extension,
+    # because ComponentArrays' `ChainRulesCore.rrule` for `getdata`/`getproperty`/
+    # `Type{ComponentArray}(...)` returns `ComponentArray` cotangents that Mooncake's
+    # `increment_and_get_rdata!` dispatch rejects by default. Downstream SciML
+    # packages hit this whenever they declare an `@from_rrule` with a ComponentArray
+    # argument, which is how the SciMLSensitivity tutorials exercised it.
+    sum_abs2(x::AbstractArray) = sum(abs2, x)
+    function ChainRulesCore.rrule(::typeof(sum_abs2), x::AbstractArray)
+        y = sum_abs2(x)
+        function sum_abs2_pb(Δy)
+            return (
+                ChainRulesCore.NoTangent(),
+                ComponentArray(2 .* Δy .* getdata(x), getaxes(x)),
+            )
+        end
+        return y, sum_abs2_pb
+    end
+    function ChainRulesCore.rrule(::typeof(sum_abs2), x::AbstractVector)
+        y = sum_abs2(x)
+        sum_abs2_pb(Δy) = (ChainRulesCore.NoTangent(), 2 .* Δy .* x)
+        return y, sum_abs2_pb
+    end
+    Mooncake.@from_rrule(
+        Mooncake.DefaultCtx,
+        Tuple{typeof(sum_abs2), ComponentVector{Float64, Vector{Float64}}},
+    )
+
+    # (a) ComponentArray cotangent against a flat-Array-backed CV fdata
+    let
+        v = ComponentArray(a = 1.0, b = 2.0, c = 3.0)
+        cache = Mooncake.prepare_gradient_cache(sum_abs2, v)
+        val, g = Mooncake.value_and_gradient!!(cache, sum_abs2, v)
+        @test val ≈ 14.0
+        @test g[2].fields.data ≈ [2.0, 4.0, 6.0]
+    end
+
+    # (b) Nested ComponentArray constructed with `ComponentArray(; u0, p_all)`
+    #     — the "feedback_control.md" layout from SciMLSensitivity#1419.
+    let
+        nested2 = ComponentArray(; u0 = [1.0, 2.0], p_all = ComponentArray(a = 3.0, b = 4.0))
+        cache = Mooncake.prepare_gradient_cache(sum_abs2, nested2)
+        val, g = Mooncake.value_and_gradient!!(cache, sum_abs2, nested2)
+        @test val ≈ 30.0
+        @test g[2].fields.data ≈ [2.0, 4.0, 6.0, 8.0]
+    end
+
+    @test Mooncake.friendly_tangent_cache(flat) isa
+        Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}
 end
