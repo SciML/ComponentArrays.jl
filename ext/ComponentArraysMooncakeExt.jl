@@ -11,4 +11,8 @@ function Mooncake.increment_and_get_rdata!(
     return Mooncake.increment_and_get_rdata!(f.data[:data], r, t)
 end
 
+function Mooncake.friendly_tangent_cache(x::ComponentArray)
+    Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}(copy(x))
+end
+
 end
