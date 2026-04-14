@@ -44,7 +44,7 @@ end
 #     tspan = (0.0u"s", 10.0u"s")
 #     pos = 0.0u"m"
 #     vel = 0.0u"m/s"
-#     x0 = ComponentArray{Union{typeof(pos), typeof(vel)}}(pos=pos, vel=vel)
+#     x0 = ComponentArray{Union{typeof(pos), typeof(vel)}}(; pos, vel)
 #     F(t) = 1
 
 #     # double integrator in state-space form

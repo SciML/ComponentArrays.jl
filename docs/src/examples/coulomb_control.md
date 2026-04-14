@@ -69,7 +69,7 @@ function feedback_sys!(D, components, p, t; ref = 0.0)
     @unpack ctrl, plant = components
 
     u = p.ctrl.fun(D.ctrl, ctrl, p.ctrl.params, t; err = ref-plant.x, v = -plant.v)
-    return p.plant.fun(D.plant, plant, p.plant.params, t; u = u)
+    return p.plant.fun(D.plant, plant, p.plant.params, t; u)
 end
 
 step_input(; time = 1.0, mag = 1.0) = (x, p, t) -> t>time ? mag : 0
@@ -91,7 +91,7 @@ const m = 50.0
 const μ = 0.1
 const k = 50.0
 
-p = (m = m, μ = μ, k = k)
+p = (; m, μ, k)
 ic = ComponentArray(v = 0, x = 0)
 
 ODEProblem(simulator(coulomb_block!, u = 5), ic, tspan, p) |> solve |> plot
@@ -147,7 +147,7 @@ plot(sol, vars = 3)
     # plant_fun = coulomb_block!
 
     ref = if reference==sine_input
-        reference(period = period, mag = magnitude)
+        reference(; period, mag = magnitude)
     else
         reference(mag = magnitude)
     end
@@ -158,25 +158,19 @@ plot(sol, vars = 3)
     c = 4*μ*m*g/(π*ω*magnitude) # Viscous equivalent damping
     k = 50.0
 
-    plant_p = (m = m, μ = μ, c = c, k = k) # We'll just put everything for both models in here
-    ctrl_p = (kp = kp, ki = ki, kd = kd)
+    plant_p = (; m, μ, c, k) # We'll just put everything for both models in here
+    ctrl_p = (; kp, ki, kd)
 
     plant_ic = (v = 0, x = 0)
     ctrl_ic = (; x = 0)
 
     # Set up and solve
     sys_p = (
-        ctrl = (
-            params = ctrl_p,
-            fun = ctrl_fun
-        ),
-        plant = (
-            params = plant_p,
-            fun = damping
-        )
+        ctrl = (params = ctrl_p, fun = ctrl_fun),
+        plant = (params = plant_p, fun = damping)
     )
     sys_ic = ComponentArray(ctrl = ctrl_ic, plant = plant_ic)
-    sys_fun = ODEFunction(simulator(feedback_sys!, ref = ref), syms = [:u, :v, :x])
+    sys_fun = ODEFunction(simulator(feedback_sys!; ref), syms = [:u, :v, :x])
     sys_prob = ODEProblem(sys_fun, sys_ic, tspan, sys_p)
 
     sol = solve(sys_prob, Tsit5())

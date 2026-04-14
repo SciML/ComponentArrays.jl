@@ -104,10 +104,10 @@ cb(θ, loss_n_ode(θ)...)
 
 data = Iterators.repeated((), 1000)
 
-res1 = sciml_train(loss_n_ode, θ, ADAM(0.05); maxiters = 100, save_best = true, cb = cb)
+res1 = sciml_train(loss_n_ode, θ, ADAM(0.05); maxiters = 100, save_best = true, cb)
 cb(res1.minimizer, loss_n_ode(res1.minimizer)...; doplot = true)
 
-res2 = sciml_train(loss_n_ode, res1.minimizer, LBFGS(), cb = cb)
+res2 = sciml_train(loss_n_ode, res1.minimizer, LBFGS(), cb)
 cb(res2.minimizer, loss_n_ode(res2.minimizer)...; doplot = true)
 
 # gif(anim, "DiffEqFlux.gif", fps=15)
