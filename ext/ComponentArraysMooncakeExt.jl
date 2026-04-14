@@ -54,12 +54,12 @@ function _increment_subarray_fdata!(f_cv, t_data::AbstractArray{P}) where {P <: 
         throw(
             ArgumentError(
                 "ComponentArraysMooncakeExt: cannot aggregate a cotangent of length " *
-                "$(length(t_data)) into a SubArray-backed ComponentVector tangent whose " *
-                "parent has length $(length(parent)). This happens when a cotangent " *
-                "flows into a view that does not fully cover its parent; there is no " *
-                "way to recover the view indices from Mooncake fdata alone. Please " *
-                "file an issue against ComponentArrays.jl with a reproducer so the " *
-                "offending rrule can be patched.",
+                    "$(length(t_data)) into a SubArray-backed ComponentVector tangent whose " *
+                    "parent has length $(length(parent)). This happens when a cotangent " *
+                    "flows into a view that does not fully cover its parent; there is no " *
+                    "way to recover the view indices from Mooncake fdata alone. Please " *
+                    "file an issue against ComponentArrays.jl with a reproducer so the " *
+                    "offending rrule can be patched.",
             ),
         )
     end
@@ -109,7 +109,7 @@ function Mooncake.increment_and_get_rdata!(
 end
 
 function Mooncake.friendly_tangent_cache(x::ComponentArray)
-    Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}(copy(x))
+    return Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}(copy(x))
 end
 
 end
