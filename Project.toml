@@ -1,7 +1,7 @@
 name = "ComponentArrays"
 uuid = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"
 authors = ["Jonnie Diegelman <47193959+jonniedie@users.noreply.github.com>"]
-version = "0.15.36"
+version = "0.15.37"
 
 [deps]
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
@@ -49,9 +49,9 @@ LinearAlgebra = "1.10"
 Optimisers = "0.3, 0.4"
 Mooncake = "0.5.25"
 Reactant = "0.2.15"
-RecursiveArrayTools = "3.8"
+RecursiveArrayTools = "3.8, 4"
 ReverseDiff = "1.15"
-SciMLBase = "2"
+SciMLBase = "2, 3"
 StaticArrayInterface = "1"
 StaticArraysCore = "1.4"
 Tracker = "0.2.37"
