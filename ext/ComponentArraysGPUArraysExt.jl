@@ -68,7 +68,7 @@ function Base.mapreduce(
     return mapreduce(f, op, getdata(x), map(getdata, args)...; kwargs...)
 end
 
-# These are all stolen from GPUArrays.j;
+# These are all stolen from GPUArrays.jl
 Base.any(A::GPUComponentArray{Bool}) = mapreduce(identity, |, getdata(A))
 Base.all(A::GPUComponentArray{Bool}) = mapreduce(identity, &, getdata(A))
 
@@ -76,7 +76,7 @@ Base.any(f::Function, A::GPUComponentArray) = mapreduce(f, |, getdata(A))
 Base.all(f::Function, A::GPUComponentArray) = mapreduce(f, &, getdata(A))
 
 function Base.count(pred::Function, A::GPUComponentArray; dims = :, init = 0)
-    return mapreduce(pred, Base.add_sum, getdata(A); init = init, dims = dims)
+    return mapreduce(pred, Base.add_sum, getdata(A); init, dims)
 end
 
 # avoid calling into `initarray!`

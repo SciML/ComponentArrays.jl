@@ -41,30 +41,30 @@ Base.show(io::IO, ci::ComponentIndex) = print(io, "ComponentIndex($(ci.idx), $(c
 
 # Show ComponentArrays
 function _print_type_short(io, ca; color = :normal)
-    return _print_type_short(io, typeof(ca); color = color)
+    return _print_type_short(io, typeof(ca); color)
 end
-_print_type_short(io, T::Type; color = :normal) = printstyled(io, T; color = color)
+_print_type_short(io, T::Type; color = :normal) = printstyled(io, T; color)
 function _print_type_short(io, ::Type{<:ComponentArray{T, N, <:Array}}; color = :normal) where {
         T, N,
     }
-    return printstyled(io, "ComponentArray{$T,$N}"; color = color)
+    return printstyled(io, "ComponentArray{$T,$N}"; color)
 end # do not pollute the stacktrace with verbose type printing
 function _print_type_short(io, ::Type{<:ComponentArray{T, 1, <:Array}}; color = :normal) where {T}
-    return printstyled(io, "ComponentVector{$T}"; color = color)
+    return printstyled(io, "ComponentVector{$T}"; color)
 end
 function _print_type_short(io, ::Type{<:ComponentArray{T, 2, <:Array}}; color = :normal) where {T}
-    return printstyled(io, "ComponentMatrix{$T}"; color = color)
+    return printstyled(io, "ComponentMatrix{$T}"; color)
 end
 function _print_type_short(io, ::Type{<:ComponentArray{T, N, <:SubArray}}; color = :normal) where {
         T, N,
     }
-    return printstyled(io, "ComponentArray{$T,$N,SubArray...}"; color = color)
+    return printstyled(io, "ComponentArray{$T,$N,SubArray...}"; color)
 end # do not pollute the stacktrace with verbose type printing
 function _print_type_short(io, ::Type{<:ComponentArray{T, 1, <:SubArray}}; color = :normal) where {T}
-    return printstyled(io, "ComponentVector{$T,SubArray...}"; color = color)
+    return printstyled(io, "ComponentVector{$T,SubArray...}"; color)
 end
 function _print_type_short(io, ::Type{<:ComponentArray{T, 2, <:SubArray}}; color = :normal) where {T}
-    return printstyled(io, "ComponentMatrix{$T,SubArray...}"; color = color)
+    return printstyled(io, "ComponentMatrix{$T,SubArray...}"; color)
 end
 
 function Base.show(io::IO, x::ComponentVector)

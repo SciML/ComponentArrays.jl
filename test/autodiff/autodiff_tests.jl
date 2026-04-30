@@ -109,7 +109,7 @@ end
 
 @testset "Issues" begin
     function mysum(x::AbstractVector)
-        y = ComponentVector(x = x)
+        y = ComponentVector(; x)
         z = ComponentVector(; z = x .^ 2)
         return sum(y) + sum(abs2, z)
     end

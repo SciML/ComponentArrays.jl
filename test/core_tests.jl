@@ -15,7 +15,7 @@ r2v(r::AbstractUnitRange) = ViewAxis(r, ShapedAxis(size(r)))
 
 ## Test setup
 c = (a = (a = 1, b = [1.0, 4.4]), b = [0.4, 2, 1, 45])
-nt = (a = 100, b = [4, 1.3], c = c)
+nt = (; a = 100, b = [4, 1.3], c)
 nt2 = (
     a = 5, b = [(a = (a = 20, b = 1), b = 0), (a = (a = 33, b = 1), b = 0)],
     c = (a = (a = 2, b = [1, 2]), b = [1.0 2.0; 5 6]),
@@ -605,10 +605,10 @@ end
     @test ldiv!(getdata(tempmat), lu(cmat + I), cmat) isa AbstractMatrix
 
     c = (a = 2, b = [1, 2])
-    x = ComponentArray(
-        a = 5, b = [
-            (a = 20.0, b = 3.0), (a = 33.0, b = 2.0), (a = 44.0, b = 3.0),
-        ], c = c
+    x = ComponentArray(;
+        a = 5,
+        b = [(a = 20.0, b = 3.0), (a = 33.0, b = 2.0), (a = 44.0, b = 3.0)],
+        c,
     )
     @test ldiv!(rand(10), Diagonal(x), x) isa Vector
 
@@ -924,7 +924,7 @@ end
     b = range(0.0, 1.0; length = 2) |> collect
     c = range(0.0, 1.0, length = 3) |> collect
     d = range(0.0, 1.0; length = 0) |> collect
-    u = ComponentVector(a = a, b = b, c = c, d = d)
+    u = ComponentVector(; a, b, c, d)
 
     function get_state_index(
             idx::Int,
