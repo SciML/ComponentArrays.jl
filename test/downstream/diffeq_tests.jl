@@ -1,4 +1,5 @@
 using ComponentArrays
+using ADTypes: AutoFiniteDiff
 using DifferentialEquations
 using OrdinaryDiffEqRosenbrock
 using LabelledArrays
@@ -79,14 +80,14 @@ end
         cprob1 = ODEProblem(f1, cu_0, (0, 100.0), p)
 
         solve(lprob1, Rodas5())
-        solve(lprob1, Rodas5(autodiff = false))
+        solve(lprob1, Rodas5(autodiff = AutoFiniteDiff()))
         solve(cprob1, Rodas5())
-        solve(cprob1, Rodas5(autodiff = false))
+        solve(cprob1, Rodas5(autodiff = AutoFiniteDiff()))
 
         ltime1 = @elapsed lsol1 = solve(lprob1, Rodas5())
-        ltime2 = @elapsed lsol2 = solve(lprob1, Rodas5(autodiff = false))
+        ltime2 = @elapsed lsol2 = solve(lprob1, Rodas5(autodiff = AutoFiniteDiff()))
         ctime1 = @elapsed csol1 = solve(cprob1, Rodas5())
-        ctime2 = @elapsed csol2 = solve(cprob1, Rodas5(autodiff = false))
+        ctime2 = @elapsed csol2 = solve(cprob1, Rodas5(autodiff = AutoFiniteDiff()))
 
         @test (ctime1 - ltime1) / ltime1 < 10.0
         @test (ctime2 - ltime2) / ltime2 < 10.0
