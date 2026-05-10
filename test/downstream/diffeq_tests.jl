@@ -1,5 +1,6 @@
 using ComponentArrays
 using DifferentialEquations
+using OrdinaryDiffEqRosenbrock
 using LabelledArrays
 using Sundials
 using Test
