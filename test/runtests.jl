@@ -44,3 +44,7 @@ elseif GROUP == "nopre"
 else
     error("Unknown test group: $GROUP. Valid groups: All, Core, Autodiff, GPU, Downstream, Reactant, nopre")
 end
+
+@testset "ComponentArrays" begin
+    include("update_tests.jl")
+end
