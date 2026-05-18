@@ -112,4 +112,21 @@ function Mooncake.friendly_tangent_cache(x::ComponentArray)
     return Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}(copy(x))
 end
 
+# === Tangent → ComponentArray gradient copy ===========================================
+# `DifferentiationInterface.value_and_gradient!(::AutoMooncake, …)` writes the gradient
+# into a user-supplied `ComponentArray` buffer with an unconditional
+# `copyto!(grad, new_grad)`. For a flat-Array-backed `ComponentArray` primal,
+# `Mooncake.tangent_type` is `Mooncake.Tangent{@NamedTuple{data::Vector{P}, axes::NoTangent}}`,
+# which is not an `AbstractArray` — so the generic `Base.copyto!(::AbstractArray, ::Any)`
+# fallback tries to iterate the tangent and fails with a `MethodError` for `iterate`.
+# Bridge that by copying the tangent's `data` field directly into the ComponentArray's
+# underlying storage.
+function Base.copyto!(
+        dest::ComponentArray{P, N, <:Array{P}},
+        src::Mooncake.Tangent{@NamedTuple{data::A, axes::Mooncake.NoTangent}},
+    ) where {P <: _FloatLike, N, A <: Array{P}}
+    copyto!(getdata(dest), src.fields.data)
+    return dest
+end
+
 end
