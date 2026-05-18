@@ -204,4 +204,22 @@ end
 
     @test Mooncake.friendly_tangent_cache(flat) isa
         Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}
+
+    # `copyto!(::ComponentVector, ::Mooncake.Tangent)` — required so that
+    # `DifferentiationInterface.value_and_gradient!(::AutoMooncake, …)` can write a
+    # Mooncake gradient back into a ComponentArray-shaped `grad` buffer. Without this
+    # bridge the generic AbstractArray `copyto!` fallback tries to iterate the Tangent
+    # and throws a MethodError. See Optimization.jl + AutoMooncake + ComponentArrays
+    # repro that surfaced this.
+    let
+        cv = ComponentArray(a = randn(5), b = randn(3))
+        t = Mooncake.zero_tangent(cv)
+        # Populate the tangent so we can verify copyto! actually transfers the data.
+        copyto!(t.fields.data, 1:8)
+        out = similar(cv)
+        copyto!(out, t)
+        @test getdata(out) == collect(1.0:8.0)
+        @test out.a == [1.0, 2.0, 3.0, 4.0, 5.0]
+        @test out.b == [6.0, 7.0, 8.0]
+    end
 end
