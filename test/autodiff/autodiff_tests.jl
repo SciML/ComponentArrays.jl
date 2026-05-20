@@ -204,4 +204,70 @@ end
 
     @test Mooncake.friendly_tangent_cache(flat) isa
         Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}
+
+    # `copyto!(::ComponentVector, ::Mooncake.Tangent)` — required so that
+    # `DifferentiationInterface.value_and_gradient!(::AutoMooncake, …)` can write a
+    # Mooncake gradient back into a ComponentArray-shaped `grad` buffer. Without this
+    # bridge the generic AbstractArray `copyto!` fallback tries to iterate the Tangent
+    # and throws a MethodError. See Optimization.jl + AutoMooncake + ComponentArrays
+    # repro that surfaced this.
+
+    # (a) Flat-Array-backed CV: tangent is
+    #     `Tangent{@NamedTuple{data::Vector{P}, axes::NoTangent}}`.
+    let
+        cv = ComponentArray(a = randn(5), b = randn(3))
+        t = Mooncake.zero_tangent(cv)
+        copyto!(t.fields.data, 1:8)
+        out = similar(cv)
+        copyto!(out, t)
+        @test getdata(out) == collect(1.0:8.0)
+        @test out.a == [1.0, 2.0, 3.0, 4.0, 5.0]
+        @test out.b == [6.0, 7.0, 8.0]
+    end
+
+    # (b) ComponentMatrix (2D underlying storage) — same flat-Array signature, since
+    #     `Matrix{P} <: Array{P}`.
+    let
+        cm = ComponentMatrix(zeros(2, 3), Axis(r = 1:2), Axis(c = 1:3))
+        t = Mooncake.zero_tangent(cm)
+        copyto!(t.fields.data, reshape(1.0:6.0, 2, 3))
+        out = similar(cm)
+        copyto!(out, t)
+        @test getdata(out) == reshape(1.0:6.0, 2, 3)
+    end
+
+    # (c) SubArray-backed CV (from `getproperty` on a nested parent): tangent nests
+    #     a Tangent that mirrors the SubArray's `(parent, indices, offset1, stride1)`
+    #     fields. As with the symmetric `_increment_subarray_fdata!` path, copy is only
+    #     well-defined when the view fully covers its parent (because the SubArray
+    #     indices are not recoverable from Mooncake tangent shape alone).
+    let
+        # Single-top-level-component CV: the inner sub-CV's view spans the entire
+        # parent storage, so the full-cover guard succeeds.
+        parent_cv = ComponentArray(u = ComponentArray(a = randn(3), b = randn(2)))
+        sub_cv = parent_cv.u
+        @assert sub_cv isa ComponentVector{Float64, <:SubArray}
+        t = Mooncake.zero_tangent(sub_cv)
+        copyto!(t.fields.data.fields.parent, 1:5)
+        out = similar(sub_cv)              # flat-Array-backed CV
+        @assert out isa ComponentVector{Float64, <:Array}
+        copyto!(out, t)
+        @test getdata(out) == collect(1.0:5.0)
+        @test out.a == [1.0, 2.0, 3.0]
+        @test out.b == [4.0, 5.0]
+    end
+
+    # (d) Partial-cover SubArray-backed CV: the inner sub-CV views only part of the
+    #     parent storage. The full-cover guard fires with a clear ArgumentError rather
+    #     than a confusing MethodError or silently producing wrong gradients.
+    let
+        parent_cv = ComponentArray(
+            u = ComponentArray(a = randn(3), b = randn(2)), v = randn(5),
+        )
+        sub_cv = parent_cv.u
+        @assert sub_cv isa ComponentVector{Float64, <:SubArray}
+        t = Mooncake.zero_tangent(sub_cv)
+        out = similar(sub_cv)
+        @test_throws ArgumentError copyto!(out, t)
+    end
 end

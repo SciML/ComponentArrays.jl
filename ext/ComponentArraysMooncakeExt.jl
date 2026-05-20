@@ -112,4 +112,61 @@ function Mooncake.friendly_tangent_cache(x::ComponentArray)
     return Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}(copy(x))
 end
 
+# === Tangent → ComponentArray gradient copy ===========================================
+# `DifferentiationInterface.value_and_gradient!(::AutoMooncake, …)` writes the gradient
+# into a user-supplied `ComponentArray` buffer with an unconditional
+# `copyto!(grad, new_grad)`. Mooncake's `tangent_type` for a `ComponentArray` is a
+# `Mooncake.Tangent` struct, which is not an `AbstractArray` — so the generic
+# `Base.copyto!(::AbstractArray, ::Any)` fallback tries to iterate the tangent and
+# fails with a `MethodError` for `iterate`. Bridge both Tangent shapes that arise.
+
+# (a) Flat-Array-backed CV: tangent_type is
+#     `Tangent{@NamedTuple{data::Vector{P}, axes::NoTangent}}`.
+function Base.copyto!(
+        dest::ComponentArray{P, N, <:Array{P}},
+        src::Mooncake.Tangent{@NamedTuple{data::A, axes::Mooncake.NoTangent}},
+    ) where {P <: _FloatLike, N, A <: Array{P}}
+    copyto!(getdata(dest), src.fields.data)
+    return dest
+end
+
+# (b) SubArray-backed CV (from `getproperty(::ComponentVector, ::Symbol)` on a nested
+#     parent): tangent_type nests an inner Tangent that mirrors the SubArray's fields.
+#     Symmetric to the `_increment_subarray_fdata!` path already in this file: copy is
+#     only well-defined when the view fully covers its parent, since the SubArray
+#     indices are not recoverable from Mooncake fdata/tangent shape alone.
+function Base.copyto!(
+        dest::ComponentArray{P, N, <:AbstractArray{P}},
+        src::Mooncake.Tangent{
+            @NamedTuple{
+                data::Mooncake.Tangent{
+                    @NamedTuple{
+                        parent::Array{P, 1},
+                        indices::Mooncake.NoTangent,
+                        offset1::Mooncake.NoTangent,
+                        stride1::Mooncake.NoTangent,
+                    },
+                },
+                axes::Mooncake.NoTangent,
+            },
+        },
+    ) where {P <: _FloatLike, N}
+    parent = src.fields.data.fields.parent
+    if length(parent) != length(getdata(dest))
+        throw(
+            ArgumentError(
+                "ComponentArraysMooncakeExt: cannot copy a SubArray-backed " *
+                    "ComponentVector tangent (parent length $(length(parent))) into a " *
+                    "ComponentArray destination of length $(length(getdata(dest))). This " *
+                    "happens when a tangent flows out of a view that does not fully cover " *
+                    "its parent; there is no way to recover the view indices from Mooncake " *
+                    "tangent fields alone. Please file an issue against ComponentArrays.jl " *
+                    "with a reproducer.",
+            ),
+        )
+    end
+    copyto!(getdata(dest), parent)
+    return dest
+end
+
 end
