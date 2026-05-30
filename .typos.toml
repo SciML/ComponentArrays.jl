@@ -1,0 +1,3 @@
+[default.extend-words]
+# `temp_noth` test variable (component array holding a `nothing` field)
+noth = "noth"
