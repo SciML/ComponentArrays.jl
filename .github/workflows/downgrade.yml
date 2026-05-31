@@ -31,6 +31,6 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         with:
-          ALLOW_RERESOLVE: false
+          allow_reresolve: true
         env:
           GROUP: ${{ matrix.group }}
