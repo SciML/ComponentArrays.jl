@@ -10,4 +10,10 @@ function Zygote.accum(x::ComponentArray, ys::ComponentArray...)
     return ComponentArray(Zygote.accum(getdata(x), getdata.(ys)...), getaxes(x))
 end
 
+function Zygote.seed(x::ComponentArray, ::Val{N}, offset = 0) where{N}
+    data = Zygote.seed(getdata(x), Val(N), offset)
+
+    ComponentArray(data, getaxes(x))
+end
+
 end
