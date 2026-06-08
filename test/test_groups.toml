@@ -1,0 +1,17 @@
+[Core]
+versions = ["lts", "1", "pre"]
+
+[Autodiff]
+versions = ["lts", "1", "pre"]
+
+[GPU]
+versions = ["lts", "1", "pre"]
+
+[Downstream]
+versions = ["lts", "1"]
+
+[Reactant]
+versions = ["lts", "1"]
+
+[nopre]
+versions = ["lts", "1"]
