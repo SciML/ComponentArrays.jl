@@ -11,31 +11,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
-  test:
-    name: Tests
-    strategy:
-      fail-fast: false
-      matrix:
-        group:
-          - Core
-          - Autodiff
-          - GPU
-          - Downstream
-          - Reactant
-          - nopre
-        version:
-          - 'lts'
-          - '1'
-          - 'pre'
-        exclude:
-          - group: nopre
-            version: 'pre'
-          - group: Downstream
-            version: 'pre'
-          - group: Reactant
-            version: 'pre'
-    uses: "SciML/.github/.github/workflows/tests.yml@v1"
-    with:
-      group: "${{ matrix.group }}"
-      julia-version: "${{ matrix.version }}"
+  tests:
+    uses: "SciML/.github/.github/workflows/grouped-tests.yml@v1"
     secrets: "inherit"
