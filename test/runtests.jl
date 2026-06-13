@@ -33,14 +33,14 @@ elseif GROUP == "Reactant"
     @time @testset "Reactant" begin
         include("reactant/reactant_tests.jl")
     end
-elseif GROUP == "nopre"
-    activate_env("nopre")
+elseif GROUP == "QA"
+    activate_env("qa")
     @time @testset "JET" begin
-        include("nopre/jet_tests.jl")
+        include("qa/jet_tests.jl")
     end
     @time @testset "Aqua" begin
-        include("nopre/aqua_tests.jl")
+        include("qa/aqua_tests.jl")
     end
 else
-    error("Unknown test group: $GROUP. Valid groups: All, Core, Autodiff, GPU, Downstream, Reactant, nopre")
+    error("Unknown test group: $GROUP. Valid groups: All, Core, Autodiff, GPU, Downstream, Reactant, QA")
 end
