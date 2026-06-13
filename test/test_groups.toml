@@ -13,5 +13,5 @@ versions = ["lts", "1"]
 [Reactant]
 versions = ["lts", "1"]
 
-[nopre]
+[QA]
 versions = ["lts", "1"]
