@@ -1,46 +1,28 @@
-using Pkg
-using Test
+using SciMLTesting
 
-const GROUP = get(ENV, "GROUP", "All")
-
-function activate_env(env_dir)
-    Pkg.activate(env_dir)
-    Pkg.develop(PackageSpec(path = dirname(@__DIR__)))
-    return Pkg.instantiate()
-end
-
-if GROUP == "All" || GROUP == "Core"
-    @time @testset "Core" begin
-        include("core_tests.jl")
-    end
-elseif GROUP == "Autodiff"
-    activate_env("autodiff")
-    @time @testset "Autodiff" begin
-        include("autodiff/autodiff_tests.jl")
-    end
-elseif GROUP == "GPU"
-    activate_env("gpu")
-    @time @testset "GPU" begin
-        include("gpu/gpu_tests.jl")
-    end
-elseif GROUP == "Downstream"
-    activate_env("downstream")
-    @time @testset "Downstream" begin
-        include("downstream/diffeq_tests.jl")
-    end
-elseif GROUP == "Reactant"
-    activate_env("reactant")
-    @time @testset "Reactant" begin
-        include("reactant/reactant_tests.jl")
-    end
-elseif GROUP == "nopre"
-    activate_env("nopre")
-    @time @testset "JET" begin
-        include("nopre/jet_tests.jl")
-    end
-    @time @testset "Aqua" begin
-        include("nopre/aqua_tests.jl")
-    end
-else
-    error("Unknown test group: $GROUP. Valid groups: All, Core, Autodiff, GPU, Downstream, Reactant, nopre")
-end
+run_tests(;
+    core = joinpath(@__DIR__, "core_tests.jl"),
+    groups = Dict(
+        "Autodiff" => (;
+            env = joinpath(@__DIR__, "Autodiff"),
+            body = joinpath(@__DIR__, "Autodiff", "autodiff_tests.jl"),
+        ),
+        "GPU" => (;
+            env = joinpath(@__DIR__, "GPU"),
+            body = joinpath(@__DIR__, "GPU", "gpu_tests.jl"),
+        ),
+        "Downstream" => (;
+            env = joinpath(@__DIR__, "Downstream"),
+            body = joinpath(@__DIR__, "Downstream", "diffeq_tests.jl"),
+        ),
+        "Reactant" => (;
+            env = joinpath(@__DIR__, "Reactant"),
+            body = joinpath(@__DIR__, "Reactant", "reactant_tests.jl"),
+        ),
+        "nopre" => (;
+            env = joinpath(@__DIR__, "nopre"),
+            body = joinpath(@__DIR__, "nopre", "nopre_tests.jl"),
+        ),
+    ),
+    all = ["Core"],
+)
