@@ -19,9 +19,9 @@ run_tests(;
             env = joinpath(@__DIR__, "Reactant"),
             body = joinpath(@__DIR__, "Reactant", "reactant_tests.jl"),
         ),
-        "nopre" => (;
-            env = joinpath(@__DIR__, "nopre"),
-            body = joinpath(@__DIR__, "nopre", "nopre_tests.jl"),
+        "QA" => (;
+            env = joinpath(@__DIR__, "qa"),
+            body = joinpath(@__DIR__, "qa", "qa.jl"),
         ),
     ),
     all = ["Core"],
