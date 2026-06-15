@@ -19,10 +19,10 @@ run_tests(;
             env = joinpath(@__DIR__, "Reactant"),
             body = joinpath(@__DIR__, "Reactant", "reactant_tests.jl"),
         ),
-        "QA" => (;
-            env = joinpath(@__DIR__, "qa"),
-            body = joinpath(@__DIR__, "qa", "qa.jl"),
-        ),
+    ),
+    qa = (;
+        env = joinpath(@__DIR__, "qa"),
+        body = joinpath(@__DIR__, "qa", "qa.jl"),
     ),
     all = ["Core"],
 )
