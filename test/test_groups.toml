@@ -3,15 +3,19 @@ versions = ["lts", "1", "pre"]
 
 [Autodiff]
 versions = ["lts", "1", "pre"]
+in_all = false
 
 [GPU]
 versions = ["lts", "1", "pre"]
+in_all = false
 
 [Downstream]
 versions = ["lts", "1"]
+in_all = false
 
 [Reactant]
 versions = ["lts", "1"]
+in_all = false
 
 [QA]
 versions = ["lts", "1"]
