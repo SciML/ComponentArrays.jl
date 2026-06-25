@@ -43,5 +43,5 @@ Base.promote_shape(a::T, b::T) where {T <: NTuple{N, CombinedAxis} where {N}} = 
 # From https://github.com/JuliaArrays/OffsetArrays.jl/blob/master/src/OffsetArrays.jl
 Base.dataids(A::ComponentArray) = Base.dataids(parent(A))
 function Broadcast.broadcast_unalias(dest::ComponentArray, src)
-    return getdata(dest) === getdata(src) ? src : Broadcast.unalias(dest, src)
+    return getdata(dest) === getdata(src) ? src : Base.unalias(dest, src)
 end
