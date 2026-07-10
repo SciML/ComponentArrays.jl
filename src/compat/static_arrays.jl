@@ -16,6 +16,31 @@ _maybe_SArray(x, vals...) = x
     return :(_maybe_SArray(ca.$s, $(Val(length(comp_ind.idx))), $(comp_ind.ax)))
 end
 
+"""
+    @static_unpack lhs = rhs
+
+Unpack fields from a `ComponentVector`, converting plain array fields to
+`StaticArrays` values when their sizes are known from the component axes.
+Scalar fields and nested `ComponentArray`s are returned unchanged.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays, StaticArrays
+
+julia> x = ComponentVector(a = 5, b = [4, 1]);
+
+julia> @static_unpack a, b = x;
+
+julia> a
+5
+
+julia> b
+2-element SVector{2, Int64} with indices SOneTo(2):
+ 4
+ 1
+```
+"""
 macro static_unpack(expr)
     @assert expr.head == :(=) "Unpack expression must have an equals sign for assignment"
     lhs, rhs = expr.args

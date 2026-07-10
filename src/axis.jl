@@ -1,3 +1,9 @@
+"""
+    AbstractAxis{IdxMap}
+
+Abstract supertype for axis metadata used by `ComponentArray` to map component
+names and shaped views onto positions in the wrapped array.
+"""
 abstract type AbstractAxis{IdxMap} end
 
 @inline indexmap(::AbstractAxis{IdxMap}) where {IdxMap} = IdxMap
@@ -53,6 +59,22 @@ function Axis(symbols::Union{AbstractVector{Symbol}, NTuple{N, Symbol}}) where {
 end
 Axis(symbols::Vararg{Symbol}) = Axis(symbols)
 
+"""
+    FlatAxis()
+
+Axis marker for an unnamed, flat dimension of a `ComponentArray`.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> x = ComponentArray(reshape(1:4, 2, 2), Axis(row = 1:2), FlatAxis());
+
+julia> getaxes(x)
+(Axis(row = 1:2,), FlatAxis())
+```
+"""
 const FlatAxis = Axis{NamedTuple()}
 const NullorFlatAxis = Union{NullAxis, FlatAxis}
 
@@ -67,6 +89,23 @@ struct ShapedAxis{Shape} <: AbstractAxis{nothing} end
 # ShapedAxis(::Tuple{<:Int}) = FlatAxis()
 Base.length(::ShapedAxis{Shape}) where {Shape} = prod(Shape)
 
+"""
+    Shaped1DAxis(shape::Tuple{<:Integer})
+
+Axis marker for a one-dimensional array component. `ShapedAxis((n,))` returns a
+`Shaped1DAxis` so vector-valued components keep their one-dimensional shape.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> ax = Shaped1DAxis((3,));
+
+julia> size(ax)
+(3,)
+```
+"""
 struct Shaped1DAxis{Shape} <: AbstractAxis{nothing} end
 ShapedAxis(shape::Tuple{<:Int}) = Shaped1DAxis{shape}()
 Shaped1DAxis(shape::Tuple{<:Int}) = Shaped1DAxis{shape}()

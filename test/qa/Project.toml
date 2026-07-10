@@ -8,5 +8,8 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 JET = "0.9, 0.10, 0.11"
 SafeTestsets = "0.0.1, 0.1"
-SciMLTesting = "1.6"
+SciMLTesting = "2.1"
 Test = "1"
+
+[sources]
+SciMLTesting = {url = "https://github.com/SciML/SciMLTesting.jl", rev = "a5cecca928f2c684c23505c3cd83921d71753e2e"}
