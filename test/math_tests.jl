@@ -143,4 +143,25 @@ s2_D = out2 * in2'
     (FlatAxis(), Axis(u2 = 1))
 
 @test ComponentArrays.ArrayInterface.lu_instance(cmat).factors isa ComponentMatrix
+
+# `lu`, `lu!`, and `lu_instance` (same for qr) must all keep the ComponentMatrix
+# wrapper on the factors, or caches typed from the instance functions break when
+# a `lu`/`qr` result is stored in them (LinearSolve's default solver does this;
+# see the PR #390 downstream CI failure).
+let A = cmat + I
+    F = lu(A)
+    @test F.factors isa ComponentMatrix
+    @test typeof(F) === typeof(ComponentArrays.ArrayInterface.lu_instance(A))
+    @test typeof(F) === typeof(lu!(copy(A)))
+    @test getdata(F.factors) == lu(getdata(A)).factors
+    @test F \ getdata(ca) ≈ getdata(A) \ getdata(ca)
+
+    Fqr = qr(A)
+    @test Fqr.factors isa ComponentMatrix
+    @test typeof(Fqr) === typeof(ComponentArrays.ArrayInterface.qr_instance(A, NoPivot()))
+    @test typeof(Fqr) === typeof(qr!(copy(A)))
+    @test Fqr \ getdata(ca) ≈ getdata(A) \ getdata(ca)
+    @test typeof(qr(A, ColumnNorm())) === typeof(qr!(copy(A), ColumnNorm())) ===
+        typeof(ComponentArrays.ArrayInterface.qr_instance(A, ColumnNorm()))
+end
 @test ComponentArrays.ArrayInterface.parent_type(cmat) === Matrix{Float64}
