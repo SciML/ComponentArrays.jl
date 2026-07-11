@@ -13,6 +13,6 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 [compat]
 LabelledArrays = "1.17.0"
 SafeTestsets = "0.0.1, 0.1"
-SciMLTesting = "1"
+SciMLTesting = "2.1"
 Test = "1"
 Unitful = "1.27.0"
