@@ -4,6 +4,7 @@ using JET
 run_qa(
     ComponentArrays;
     explicit_imports = true,
+    api_docs_kwargs = (; rendered = true),
     # ComponentArrays has real method ambiguities and unbound type parameters in its
     # vcat/hcat/getindex/Axis overloads; these are long-standing design realities, not
     # tracked-broken placeholders, so disable the sub-checks rather than fail.

@@ -1,5 +1,18 @@
 @deprecate fastindices(i::Tuple) Val.(i)
 @deprecate fastindices(i...) Val.((i...,))
+@doc """
+    fastindices(i...)
+    fastindices(i::Tuple)
+
+Deprecated helper for converting symbolic indices to `Val` wrappers. Use `Val`
+constructors directly instead.
+
+# Examples
+
+```julia
+Val.((:a, :b))
+```
+""" fastindices
 
 # Make a Val if input isn't already one
 toval(x::Val) = x
