@@ -5,8 +5,8 @@ import StaticArrayInterface, ArrayInterface, Functors
 import ConstructionBase
 import Adapt
 
-using LinearAlgebra: LinearAlgebra, Adjoint, Cholesky, Diagonal, I, LU, Transpose,
-    UniformScaling, axpby!, axpy!, ldiv!
+using LinearAlgebra: LinearAlgebra, Adjoint, Cholesky, ColumnNorm, Diagonal, I, LU,
+    NoPivot, RowMaximum, RowNonZero, Transpose, UniformScaling, axpby!, axpy!, ldiv!
 using StaticArraysCore: StaticArray, SArray, SVector
 
 const FlatIdx = Union{Integer, CartesianIndex, CartesianIndices, AbstractArray{<:Integer}}
