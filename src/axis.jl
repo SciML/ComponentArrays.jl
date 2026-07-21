@@ -3,6 +3,38 @@
 
 Abstract supertype for axis metadata used by `ComponentArray` to map component
 names and shaped views onto positions in the wrapped array.
+
+# Type Parameters
+
+  - `IdxMap`: A static `NamedTuple` mapping component names to component indices or
+    nested axis metadata. It is stored as a type parameter so generic indexing can
+    resolve the map without per-instance storage.
+
+# Interface
+
+Subtypes represent static component metadata. A subtype must use an `IdxMap` whose keys
+are the component names accepted by the axis and whose values are valid component
+indices, ranges, nested named tuples, or axis metadata supported by `ComponentArray`.
+The map must describe the same component layout for every instance of the subtype.
+
+Generic `keys(axis)` and `axis[name]` methods derive their behavior from `IdxMap`;
+subtypes normally do not need to implement them. Define a custom subtype only when a
+distinct axis representation is required. Use [`Axis`](@ref) for ordinary named component
+layouts.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> struct TwoComponentAxis <: AbstractAxis{(left = 1, right = 2)} end
+
+julia> ax = TwoComponentAxis();
+
+julia> keys(ax)
+(:left, :right)
+
+```
 """
 abstract type AbstractAxis{IdxMap} end
 

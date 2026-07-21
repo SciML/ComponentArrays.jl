@@ -32,3 +32,12 @@ x = ComponentArray(b = 1, a = 2)
 @test kw_fun(; x...) == 2
 
 @test length(ViewAxis(2:7, ShapedAxis((2, 3)))) == 6
+
+@testset "AbstractAxis generic interface" begin
+    struct TwoComponentAxis <: AbstractAxis{(left = 1, right = 2)} end
+
+    axis = TwoComponentAxis()
+    @test keys(axis) == (:left, :right)
+    @test axis[:left].idx == 1
+    @test axis[:right].idx == 2
+end
