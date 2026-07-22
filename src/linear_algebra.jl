@@ -27,20 +27,13 @@ function LinearAlgebra.qr(
         A::ComponentMatrix, pivot::Union{NoPivot, ColumnNorm} = NoPivot();
         kwargs...,
     )
-    F = LinearAlgebra.qr(getdata(A), pivot; kwargs...)
-    return _rewrap_qr(F, getaxes(A))
+    return LinearAlgebra.qr!(copy(A), pivot; kwargs...)
 end
 
 function ArrayInterface.qr_instance(A::ComponentMatrix, pivot = NoPivot())
-    F = ArrayInterface.qr_instance(getdata(A), pivot)
-    return _rewrap_qr(F, getaxes(A))
+    instance = ComponentArray(zeros(eltype(A), 0, 0), getaxes(A)...)
+    return LinearAlgebra.qr!(instance, pivot)
 end
-
-function _rewrap_qr(F::LinearAlgebra.QR, ax)
-    return typeof(F)(ComponentArray(F.factors, ax), F.T)
-end
-_rewrap_qr(F::LinearAlgebra.QRPivoted, ax) = LinearAlgebra.QRPivoted(ComponentArray(F.factors, ax), F.τ, F.jpvt)
-_rewrap_qr(F, ax) = F
 
 # Helpers for dealing with adjoints and such
 _first_axis(x::AbstractComponentVecOrMat) = getaxes(x)[1]
