@@ -36,8 +36,8 @@ function ArrayInterface.qr_instance(A::ComponentMatrix, pivot = NoPivot())
     return _rewrap_qr(F, getaxes(A))
 end
 
-function _rewrap_qr(F::LinearAlgebra.QRCompactWY, ax)
-    return LinearAlgebra.QRCompactWY(ComponentArray(F.factors, ax), F.T)
+function _rewrap_qr(F::LinearAlgebra.QR, ax)
+    return typeof(F)(ComponentArray(F.factors, ax), F.T)
 end
 _rewrap_qr(F::LinearAlgebra.QRPivoted, ax) = LinearAlgebra.QRPivoted(ComponentArray(F.factors, ax), F.τ, F.jpvt)
 _rewrap_qr(F, ax) = F
