@@ -22,7 +22,27 @@ Base.length(ci::ComponentIndex) = length(ci.idx)
 """
     KeepIndex(idx)
 
-Tag an index of a `ComponentArray` to retain it's `Axis` through indexing
+Wrap an index so indexing a `ComponentArray` retains component metadata for the selected
+entries. Use `KeepIndex` when a symbolic, integer, or range lookup should return a
+`ComponentArray` instead of a plain array or scalar.
+
+# Arguments
+
+  - `idx`: A component name, flat index, range, or `:` accepted by `ComponentArray`
+    indexing. Integer indices are converted to a one-element range.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> x = ComponentArray(a = 1, b = [2, 3]);
+
+julia> kept = x[KeepIndex(:b)];
+
+julia> keys(kept)
+(:b,)
+```
 """
 struct KeepIndex{Idx} end
 KeepIndex(idx) = KeepIndex{idx}()

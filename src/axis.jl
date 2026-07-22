@@ -57,8 +57,12 @@ Gives named component access for `ComponentArray`s.
 ```jldoctest
 julia> using ComponentArrays
 
-julia> ax = Axis((a = 1, b = ViewAxis(2:7, PartitionedAxis(2, (a = 1, b = 2))),
-           c = ViewAxis(8:10, (a = 1, b = 2:3))));
+julia> ax = Axis(
+           (
+               a = 1, b = ViewAxis(2:7, PartitionedAxis(2, (a = 1, b = 2))),
+               c = ViewAxis(8:10, (a = 1, b = 2:3)),
+           )
+       );
 
 julia> A = [100, 4, 1.3, 1, 1, 4.4, 0.4, 2, 1, 45];
 
@@ -111,10 +115,24 @@ const FlatAxis = Axis{NamedTuple()}
 const NullorFlatAxis = Union{NullAxis, FlatAxis}
 
 """
-    sa = ShapedAxis(shape)
+    ShapedAxis(shape::Tuple{Vararg{Integer}})
 
-Preserves higher-dimensional array components in `ComponentArray`s (matrix components, for
-example)
+Axis metadata that preserves the shape of a multidimensional component stored in a flat
+`ComponentArray` data buffer.
+
+# Arguments
+
+  - `shape`: The dimensions of the component. A one-dimensional `shape` produces a
+    [`Shaped1DAxis`](@ref) instead.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> size(ShapedAxis((2, 3)))
+(2, 3)
+```
 """
 struct ShapedAxis{Shape} <: AbstractAxis{nothing} end
 @inline ShapedAxis(Shape) = ShapedAxis{Shape}()
@@ -153,9 +171,27 @@ Base.size(::ShapedAxis{Shape}) where {Shape} = Shape
 Base.size(::Shaped1DAxis{Shape}) where {Shape} = Shape
 
 """
-    pa = PartitionedAxis(partition_size, index_map)
+    PartitionedAxis(partition_size, index_map)
 
-Axis for creating arrays of `ComponentArray`s
+Axis metadata for a homogeneous array of component layouts. Constructing a
+`ComponentArray` with a `PartitionedAxis` produces a lazy array whose entries are
+`ComponentArray`s sharing the same component map.
+
+# Arguments
+
+  - `partition_size`: Number of flat data elements in each component layout.
+  - `index_map`: A `NamedTuple` or [`AbstractAxis`](@ref) describing one layout.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> axis = PartitionedAxis(2, (x = 1, y = 2));
+
+julia> size(axis)
+2
+```
 """
 struct PartitionedAxis{PartSz, IdxMap, Ax <: AbstractAxis{IdxMap}} <: AbstractAxis{IdxMap}
     ax::Ax
@@ -175,9 +211,27 @@ Base.size(::PartitionedAxis{PartSz, IdxMap}) where {PartSz, IdxMap} = PartSz
 Base.size(::Type{PartitionedAxis{PartSz, IdxMap}}) where {PartSz, IdxMap} = PartSz
 
 """
-    va = ViewAxis(parent_index, index_map)
+    ViewAxis(parent_index, index_map)
 
-Axis for creating arrays of `ComponentArray`s
+Axis metadata that maps a component layout onto `parent_index` in its parent array.
+`ViewAxis` preserves nested component names while recording the parent positions used to
+retrieve the component. For flat and null axes it simplifies to the bare index.
+
+# Arguments
+
+  - `parent_index`: Indices of the component in the parent array.
+  - `index_map`: A `NamedTuple` or [`AbstractAxis`](@ref) describing the component layout.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> axis = ViewAxis(2:3, (x = 1, y = 2));
+
+julia> keys(axis)
+(:x, :y)
+```
 """
 struct ViewAxis{Inds, IdxMap, Ax <: AbstractAxis{IdxMap}} <: AbstractAxis{IdxMap}
     ax::Ax

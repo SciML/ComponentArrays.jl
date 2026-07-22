@@ -1,6 +1,4 @@
-@deprecate fastindices(i::Tuple) Val.(i)
-@deprecate fastindices(i...) Val.((i...,))
-@doc """
+"""
     fastindices(i...)
     fastindices(i::Tuple)
 
@@ -12,7 +10,16 @@ constructors directly instead.
 ```julia
 Val.((:a, :b))
 ```
-""" fastindices
+"""
+function fastindices(i::Tuple)
+    Base.depwarn("`fastindices(i::Tuple)` is deprecated, use `Val.(i)` instead.", :fastindices)
+    return Val.(i)
+end
+
+function fastindices(i...)
+    Base.depwarn("`fastindices(i...)` is deprecated, use `Val.(i)` instead.", :fastindices)
+    return Val.(i)
+end
 
 # Make a Val if input isn't already one
 toval(x::Val) = x
