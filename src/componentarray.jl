@@ -1,8 +1,8 @@
 """
     x = ComponentArray(nt::NamedTuple)
-    x = ComponentArray(;kwargs...)
+    x = ComponentArray(; kwargs...)
     x = ComponentArray(data::AbstractVector, ax)
-    x = ComponentArray{T}(args...; kwargs...) where T
+    x = ComponentArray{T}(args...; kwargs...) where {T}
 
 Array type that can be accessed like an arbitrary nested mutable struct.
 
@@ -111,9 +111,9 @@ function fill_componentarray_ka! end # defined in extensions
 ## Some aliases
 """
     x = ComponentVector(nt::NamedTuple)
-    x = ComponentVector(;kwargs...)
+    x = ComponentVector(; kwargs...)
     x = ComponentVector(data::AbstractVector, ax)
-    x = ComponentVector{T}(args...; kwargs...) where T
+    x = ComponentVector{T}(args...; kwargs...) where {T}
 
 A `ComponentVector` is an alias for a one-dimensional `ComponentArray`.
 """
@@ -142,7 +142,7 @@ ComponentVector{T}(x::ComponentVector) where {T} = T.(x)
 
 """
     x = ComponentMatrix(data::AbstractMatrix, ax...)
-    x = ComponentMatrix{T}(data::AbstractMatrix, ax...) where T
+    x = ComponentMatrix{T}(data::AbstractMatrix, ax...) where {T}
 
 A `ComponentMatrix` is an alias for a two-dimensional `ComponentArray`.
 """
@@ -334,7 +334,23 @@ remove_nulls(::NullAxis, args...) = (remove_nulls(args...)...,)
 """
     getdata(x::ComponentArray)
 
-Access `.data` field of a `ComponentArray`, which contains the array that `ComponentArray` wraps.
+Return the backing array of a `ComponentArray`. For ordinary arrays and scalars, `getdata`
+returns its argument unchanged; this makes generic code work with both wrapped and
+unwrapped values.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> x = ComponentArray(a = 1, b = [2, 3]);
+
+julia> getdata(x)
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
 """
 @inline getdata(x::ComponentArray) = getfield(x, :data)
 @inline getdata(x) = x

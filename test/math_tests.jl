@@ -157,11 +157,22 @@ let A = cmat + I
     @test F \ getdata(ca) ≈ getdata(A) \ getdata(ca)
 
     Fqr = qr(A)
+    Fqr_instance = ComponentArrays.ArrayInterface.qr_instance(A, NoPivot())
     @test Fqr.factors isa ComponentMatrix
-    @test typeof(Fqr) === typeof(ComponentArrays.ArrayInterface.qr_instance(A, NoPivot()))
+    @test Fqr_instance.factors isa ComponentMatrix
+    @test size(Fqr_instance.factors) == (0, 0)
+    @test getaxes(Fqr_instance.factors) == getaxes(A)
+    @test typeof(Fqr) === typeof(Fqr_instance)
     @test typeof(Fqr) === typeof(qr!(copy(A)))
     @test Fqr \ getdata(ca) ≈ getdata(A) \ getdata(ca)
-    @test typeof(qr(A, ColumnNorm())) === typeof(qr!(copy(A), ColumnNorm())) ===
-        typeof(ComponentArrays.ArrayInterface.qr_instance(A, ColumnNorm()))
+
+    Fqr_pivoted = qr(A, ColumnNorm())
+    Fqr_pivoted_instance = ComponentArrays.ArrayInterface.qr_instance(A, ColumnNorm())
+    @test Fqr_pivoted.factors isa ComponentMatrix
+    @test Fqr_pivoted_instance.factors isa ComponentMatrix
+    @test size(Fqr_pivoted_instance.factors) == (0, 0)
+    @test getaxes(Fqr_pivoted_instance.factors) == getaxes(A)
+    @test typeof(Fqr_pivoted) === typeof(qr!(copy(A), ColumnNorm())) ===
+        typeof(Fqr_pivoted_instance)
 end
 @test ComponentArrays.ArrayInterface.parent_type(cmat) === Matrix{Float64}
