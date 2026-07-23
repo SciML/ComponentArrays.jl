@@ -29,7 +29,8 @@ end
     # Sundials CVODE_BDF doesn't support ComponentArrays directly (NVector conversion fails)
     # Tracking: https://github.com/SciML/ComponentArrays.jl/issues/332
     @test_broken begin
-        sol = solve(prob, CVODE_BDF(linear_solver = :BCG), reltol = 1.0e-15, abstol = 1.0e-15)
+        sol =
+            solve(prob, CVODE_BDF(linear_solver = :BCG), reltol = 1.0e-15, abstol = 1.0e-15)
         sol(1)[1] ≈ exp(1)
     end
 end
@@ -73,7 +74,7 @@ end
 
         p = [0.1, 0.1]
 
-        lu_0 = @LArray fill(1000.0, 2 * n) (x = (1:n), y = ((n + 1):(2 * n)))
+        lu_0 = @LArray fill(1000.0, 2 * n) (x = (1:n), y = ((n+1):(2*n)))
         cu_0 = ComponentArray(x = fill(1000.0, n), y = fill(1000.0, n))
 
         lprob1 = ODEProblem(f1, lu_0, (0, 100.0), p)
@@ -105,9 +106,9 @@ end
         h² = (1.0 / (nknots + 1))^2
         function heat_conduction(du, u, p, t)
             u₃ = @view u[3:end]
-            u₂ = @view u[2:(end - 1)]
-            u₁ = @view u[1:(end - 2)]
-            @. du[2:(end - 1)] = (u₃ - 2 * u₂ + u₁) / h²
+            u₂ = @view u[2:(end-1)]
+            u₁ = @view u[1:(end-2)]
+            @. du[2:(end-1)] = (u₃ - 2 * u₂ + u₁) / h²
             nothing
         end
 
@@ -131,4 +132,55 @@ end
         @test (ctime - time) / time < 10.0
         @test (ctime - ltime) / ltime < 10.0
     end
+end
+
+@testset "SymbolicIndexingInterface solution indexing (SciML/DifferentialEquations.jl#957)" begin
+    using SymbolicIndexingInterface:
+        is_variable, variable_index, variable_symbols, is_parameter, parameter_symbols
+
+    function lorenz!(du, u, p, t)
+        du.x = p.a * (u.y - u.x)
+        du.y = u.x * (p.b - u.z) - u.y
+        du.z = u.x * u.y - p.c * u.z
+        return nothing
+    end
+
+    u0 = ComponentVector(x = 1.0, y = 0.0, z = 0.0)
+    p = ComponentVector(a = 10.0, b = 28.0, c = 8 / 3)
+    prob = ODEProblem(lorenz!, u0, (0.0, 1.0), p)
+    sol = solve(prob, Tsit5())
+
+    @test is_variable(sol, :x)
+    @test variable_index(sol, :x) === :x
+    @test variable_symbols(sol) == [:x, :y, :z]
+    @test sol[:x][1] == 1.0
+    @test sol(0.1; idxs = :x) isa Real
+    @test sol(0.0:0.1:0.3; idxs = :x) isa AbstractVector
+    @test size(Array(sol(0.0:0.1:0.3; idxs = [:x, :y]))) == (2, 4)
+    @test is_parameter(sol, :a)
+    @test parameter_symbols(sol) == [:a, :b, :c]
+    @test sol.ps[:a] == 10.0
+    @test !is_variable(sol, :a)
+    @test !is_parameter(sol, :x)
+
+    # Nested top-level components remain indexable by name
+    function nest!(du, u, p, t)
+        du.a = -u.a
+        du.b.x = -u.b.x
+        du.b.y = -u.b.y
+        return nothing
+    end
+    un = ComponentVector(a = 1.0, b = (x = 2.0, y = 3.0))
+    soln = solve(ODEProblem(nest!, un, (0.0, 1.0)), Tsit5())
+    @test is_variable(soln, :b)
+    @test soln[:a][1] == 1.0
+    @test soln[:b][1].x == 2.0
+
+    # Explicit `sys` on the ODEFunction is not overridden
+    using SymbolicIndexingInterface: SymbolCache
+    sys = SymbolCache([:x, :y, :z], [:a, :b, :c], :t)
+    f = ODEFunction(lorenz!; sys = sys)
+    sol_sys = solve(ODEProblem(f, u0, (0.0, 0.1), p), Tsit5())
+    @test sol_sys[:x][1] == 1.0
+    @test variable_index(sol_sys, :x) == 1
 end
