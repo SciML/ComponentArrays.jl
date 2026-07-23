@@ -74,7 +74,7 @@ end
 
         p = [0.1, 0.1]
 
-        lu_0 = @LArray fill(1000.0, 2 * n) (x = (1:n), y = ((n+1):(2*n)))
+        lu_0 = @LArray fill(1000.0, 2 * n) (x = (1:n), y = ((n + 1):(2 * n)))
         cu_0 = ComponentArray(x = fill(1000.0, n), y = fill(1000.0, n))
 
         lprob1 = ODEProblem(f1, lu_0, (0, 100.0), p)
@@ -106,9 +106,9 @@ end
         h² = (1.0 / (nknots + 1))^2
         function heat_conduction(du, u, p, t)
             u₃ = @view u[3:end]
-            u₂ = @view u[2:(end-1)]
-            u₁ = @view u[1:(end-2)]
-            @. du[2:(end-1)] = (u₃ - 2 * u₂ + u₁) / h²
+            u₂ = @view u[2:(end - 1)]
+            u₁ = @view u[1:(end - 2)]
+            @. du[2:(end - 1)] = (u₃ - 2 * u₂ + u₁) / h²
             nothing
         end
 
