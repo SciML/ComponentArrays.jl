@@ -174,5 +174,13 @@ let A = cmat + I
     @test getaxes(Fqr_pivoted_instance.factors) == getaxes(A)
     @test typeof(Fqr_pivoted) === typeof(qr!(copy(A), ColumnNorm())) ===
         typeof(Fqr_pivoted_instance)
+
+    # Non-BLAS eltypes go through the generic `QR` factorization instead of `QRCompactWY`.
+    Abig = ComponentArray(big.(getdata(A)), getaxes(A))
+    Fqr_big = qr(Abig)
+    Fqr_big_instance = ComponentArrays.ArrayInterface.qr_instance(Abig, NoPivot())
+    @test Fqr_big.factors isa ComponentMatrix
+    @test Fqr_big_instance.factors isa ComponentMatrix
+    @test typeof(Fqr_big) === typeof(qr!(copy(Abig))) === typeof(Fqr_big_instance)
 end
 @test ComponentArrays.ArrayInterface.parent_type(cmat) === Matrix{Float64}

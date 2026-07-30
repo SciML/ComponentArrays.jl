@@ -16,7 +16,7 @@ run_qa(
                 :combine_axes, :dataids, :elsize, :maybeview, :print_array,
                 :print_matrix, :to_index, :unalias, :unsafe_convert,
                 # LinearAlgebra non-public (lu_instance/factorization internals):
-                :BlasInt, :lutype,
+                :BlasInt, :QRCompactWY, :lutype,
                 # Adapt non-public (adapt_storage/adapt_structure extension):
                 :adapt_storage, :adapt_structure,
                 # ChainRulesCore non-public:
