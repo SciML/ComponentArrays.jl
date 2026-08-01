@@ -1,6 +1,7 @@
 module ComponentArraysReverseDiffExt
 
-using ComponentArrays, ReverseDiff
+using ComponentArrays
+using ReverseDiff: ReverseDiff
 
 const TrackedComponentArray{
     V, D, N, DA, A, Ax,

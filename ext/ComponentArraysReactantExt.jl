@@ -1,7 +1,8 @@
 module ComponentArraysReactantExt
 
 using ArrayInterface: ArrayInterface
-using ComponentArrays, Reactant
+using ComponentArrays
+using Reactant: Reactant
 
 const TracedComponentVector{T} = ComponentVector{
     Reactant.TracedRNumber{T}, <:Reactant.TracedRArray{T},

@@ -1,7 +1,8 @@
 module ComponentArraysTrackerExt
 
 using ArrayInterface: ArrayInterface
-using ComponentArrays, Tracker
+using ComponentArrays
+using Tracker: Tracker, TrackedArray
 
 function Tracker.param(ca::ComponentArray)
     x = getdata(ca)

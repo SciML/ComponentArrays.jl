@@ -1,6 +1,7 @@
 module ComponentArraysZygoteExt
 
-using ComponentArrays, Zygote
+using ComponentArrays
+using Zygote: Zygote
 
 # For most cases this work. However, if the ComponentArray contains ROCArray, it fails to
 # compile the broadcast operation on AMDGPU. This will most likely be fixed with proper

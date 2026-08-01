@@ -1,7 +1,10 @@
 module ComponentArraysGPUArraysExt
 
-using ComponentArrays, LinearAlgebra, GPUArrays
+using ComponentArrays
+using LinearAlgebra: LinearAlgebra, dot, norm
+using GPUArrays: GPUArrays, AbstractGPUArray
 using ComponentArrays: recursive_eltype
+using Adapt: adapt
 
 const GPUComponentArray = ComponentArray{
     T, N, <:GPUArrays.AbstractGPUArray, Ax,
@@ -106,7 +109,7 @@ function ComponentArrays.ComponentArray(
     T = recursive_eltype(nt)
     gpuarray = getdata(first(nt))
     G = Base.typename(typeof(gpuarray)).wrapper  # SciMLBase.parameterless_type(gpuarray)
-    return GPUArrays.adapt(G, ComponentArray(NamedTuple{names}(map(GPUArrays.adapt(Array{T}), nt))))
+    return adapt(G, ComponentArray(NamedTuple{names}(map(adapt(Array{T}), nt))))
 end
 
 function LinearAlgebra.mul!(
