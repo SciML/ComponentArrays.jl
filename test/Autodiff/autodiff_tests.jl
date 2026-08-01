@@ -143,7 +143,7 @@ end
     let
         cache = Mooncake.prepare_gradient_cache(loss_flat, flat)
         _, g = Mooncake.value_and_gradient!!(cache, loss_flat, flat)
-        @test g[2].fields.data ≈ [2.0, 0.5, 6.0]
+        @test getdata(g[2]) ≈ [2.0, 0.5, 6.0]
     end
 
     u0 = ComponentArray(x = 1.0, y = 2.0)
@@ -153,7 +153,7 @@ end
     let
         cache = Mooncake.prepare_gradient_cache(loss_nested, nested)
         _, g = Mooncake.value_and_gradient!!(cache, loss_nested, nested)
-        @test g[2].fields.data ≈ [2.0, 4.0, 3.0, 4.0, 5.0]
+        @test getdata(g[2]) ≈ [2.0, 4.0, 3.0, 4.0, 5.0]
     end
 
     # @from_rrule round-trip — this is the path that fails without the extension,
@@ -189,7 +189,7 @@ end
         cache = Mooncake.prepare_gradient_cache(sum_abs2, v)
         val, g = Mooncake.value_and_gradient!!(cache, sum_abs2, v)
         @test val ≈ 14.0
-        @test g[2].fields.data ≈ [2.0, 4.0, 6.0]
+        @test getdata(g[2]) ≈ [2.0, 4.0, 6.0]
     end
 
     # (b) Nested ComponentArray constructed with `ComponentArray(; u0, p_all)`
@@ -199,7 +199,7 @@ end
         cache = Mooncake.prepare_gradient_cache(sum_abs2, nested2)
         val, g = Mooncake.value_and_gradient!!(cache, sum_abs2, nested2)
         @test val ≈ 30.0
-        @test g[2].fields.data ≈ [2.0, 4.0, 6.0, 8.0]
+        @test getdata(g[2]) ≈ [2.0, 4.0, 6.0, 8.0]
     end
 
     @test Mooncake.friendly_tangent_cache(flat) isa
@@ -212,12 +212,12 @@ end
     # and throws a MethodError. See Optimization.jl + AutoMooncake + ComponentArrays
     # repro that surfaced this.
 
-    # (a) Flat-Array-backed CV: tangent is
-    #     `Tangent{@NamedTuple{data::Vector{P}, axes::NoTangent}}`.
+    # (a) Flat-Array-backed CV: tangent_type is the ComponentArray type itself, so
+    #     `t` is a `ComponentVector` and `getdata(t)` is its underlying `Vector{P}`.
     let
         cv = ComponentArray(a = randn(5), b = randn(3))
         t = Mooncake.zero_tangent(cv)
-        copyto!(t.fields.data, 1:8)
+        copyto!(getdata(t), 1:8)
         out = similar(cv)
         copyto!(out, t)
         @test getdata(out) == collect(1.0:8.0)
@@ -230,7 +230,7 @@ end
     let
         cm = ComponentMatrix(zeros(2, 3), Axis(r = 1:2), Axis(c = 1:3))
         t = Mooncake.zero_tangent(cm)
-        copyto!(t.fields.data, reshape(1.0:6.0, 2, 3))
+        copyto!(getdata(t), reshape(1.0:6.0, 2, 3))
         out = similar(cm)
         copyto!(out, t)
         @test getdata(out) == reshape(1.0:6.0, 2, 3)
