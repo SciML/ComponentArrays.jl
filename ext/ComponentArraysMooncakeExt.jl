@@ -1,6 +1,7 @@
 module ComponentArraysMooncakeExt
 
-using ComponentArrays, Mooncake
+using ComponentArrays
+using Mooncake: Mooncake
 using Base: IEEEFloat
 
 const _FloatLike = Union{IEEEFloat, Complex{<:IEEEFloat}}

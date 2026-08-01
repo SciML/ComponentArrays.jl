@@ -1,9 +1,9 @@
 # SciMLBase + SymbolicIndexingInterface integration for ComponentArrays
 module ComponentArraysSciMLBaseExt
 
-using ComponentArrays, SciMLBase
-
-const SII = SciMLBase.SymbolicIndexingInterface
+using ComponentArrays
+using SciMLBase: SciMLBase
+using SymbolicIndexingInterface: SymbolicIndexingInterface as SII
 
 """
 Index provider that exposes top-level `ComponentArray` keys as symbolic variables
