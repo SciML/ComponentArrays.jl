@@ -1,6 +1,7 @@
 using ComponentArrays
 import ChainRulesCore, FiniteDiff, ForwardDiff, Mooncake, ReverseDiff, Tracker, Zygote
 using Optimisers, ArrayInterface
+using Random: MersenneTwister
 using Test
 
 F(a, x) = sum(abs2, a) * x^3
@@ -269,5 +270,21 @@ end
         t = Mooncake.zero_tangent(sub_cv)
         out = similar(sub_cv)
         @test_throws ArgumentError copyto!(out, t)
+    end
+
+    # Regression test for the tangent lifecycle (zero_tangent/randn_tangent/increment!!).
+    let
+        rng = MersenneTwister(42)
+        x = ComponentArray(a = randn(rng, 3), b = randn(rng, 2))
+        z = Mooncake.zero_tangent(x)
+        @test getdata(z) == zeros(5)
+        @test z isa typeof(x)
+
+        t1 = Mooncake.randn_tangent(rng, x)
+        t2 = Mooncake.randn_tangent(rng, x)
+        d1, d2 = copy(getdata(t1)), copy(getdata(t2))
+        summed = Mooncake.increment!!(t1, t2)
+        @test summed === t1 # flat-Array-backed tangents increment in place
+        @test getdata(summed) ≈ d1 + d2
     end
 end

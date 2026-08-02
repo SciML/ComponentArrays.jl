@@ -213,7 +213,6 @@ function Mooncake.increment_internal!!(c::Mooncake.IncCache, x::A, y::A) where {
     x .+= y
     return x
 end
-Mooncake.TestUtils.__increment_should_allocate(::Type{<:FlatComponentArray}) = true
 Mooncake.set_to_zero_internal!!(::Mooncake.SetToZeroCache, x::FlatComponentArray) = (x .= 0; x)
 
 # Used by Mooncake's finite-difference tests, not the real backward pass.
@@ -314,26 +313,11 @@ function Mooncake.increment_and_get_rdata!(f::P, ::Mooncake.NoRData, t::P) where
     return Mooncake.NoRData()
 end
 
-# Used by Mooncake's test suite for aliasing checks. The generic path calls
-# __get_data_field, which doesn't know our type, so override it directly like Memory
-# and CuArray do. pointer_from_objref doesn't work on ComponentArray (immutable), so
-# delegate to Array's own handling of `.data` instead.
-function Mooncake.TestUtils.populate_address_map_internal(
-        m::Mooncake.TestUtils.AddressMap, p::FlatComponentArray, t::FlatComponentArray
-    )
-    return Mooncake.TestUtils.populate_address_map_internal(m, getdata(p), getdata(t))
-end
 function Mooncake.__verify_fdata_value(::IdDict{Any, Nothing}, p::FlatComponentArray, f::FlatComponentArray)
     if size(p) != size(f)
         throw(Mooncake.InvalidFDataException("p has size $(size(p)) but f has size $(size(f))"))
     end
     return nothing
-end
-
-function Mooncake.TestUtils.has_equal_data_internal(
-        x::P, y::P, equal_undefs::Bool, d::IdDict{Any, Bool}
-    ) where {P <: FlatComponentArray}
-    return isapprox(getdata(x), getdata(y))
 end
 
 end

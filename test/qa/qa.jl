@@ -75,6 +75,17 @@ run_qa(
                 :AsPrimal, :FData, :FriendlyTangentCache, :NoFData, :NoRData,
                 :NoTangent, :Tangent, :friendly_tangent_cache,
                 :increment_and_get_rdata!,
+                # Mooncake non-public, continued: native tangent-type declaration for
+                # flat-Array-backed ComponentArrays.
+                :CoDual, :IncCache, :InvalidFDataException, :MaybeCache, :MinimalCtx,
+                :NoPullback, :SetToZeroCache, :(var"@foldable"), :(var"@is_primitive"),
+                :_add_to_primal_internal, :_dot_internal, :_new_, :_scale_internal,
+                :__verify_fdata_value, :fdata_type, :frule!!, :increment!!,
+                :increment_internal!!, :lgetfield, :primal,
+                :primal_to_tangent_internal!!, :randn_tangent_internal, :rdata_type,
+                :rrule!!, :set_to_zero_internal!!, :tangent,
+                :tangent_to_primal_internal!!, :tangent_type, :to_cr_tangent,
+                :zero_tangent_internal,
                 # SciMLBase non-public: the legacy `syms`/`sys` accessors the index
                 # provider has to consult to stay compatible with problems that predate
                 # SymbolicIndexingInterface.
