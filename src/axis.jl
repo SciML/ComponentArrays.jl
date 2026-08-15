@@ -27,6 +27,8 @@ any methods itself:
     `ComponentIndex` whose indices are concatenated in the requested order.
   - `firstindex(axis)` and `lastindex(axis)` describe the first and last flattened
     positions represented by the map.
+  - `valkeys(axis)` returns the same component names wrapped in `Val` objects for
+    allocation-free generated indexing.
 
 When an axis is passed to [`ComponentArray`](@ref), its map must describe exactly the
 component positions in the supplied data, including any nested or shaped metadata.
@@ -60,8 +62,28 @@ const VarAxes = Tuple{Vararg{AbstractAxis}}
 
 """
     ax = Axis(nt::NamedTuple)
+    ax = Axis(; kwargs...)
+    ax = Axis(symbols)
 
-Gives named component access for `ComponentArray`s.
+Construct static named-component metadata for a `ComponentArray`. The values in the
+mapping are one-based flat indices, ranges, nested named tuples, or other axis metadata.
+Use the keyword form for ordinary named layouts and the positional form when the complete
+mapping is already available as a `NamedTuple`.
+
+# Arguments
+
+  - `nt`: A `NamedTuple` mapping component names to flat indices or nested metadata.
+  - `symbols`: A tuple, vector, or varargs of `Symbol`s. The symbols are assigned
+    consecutive one-based indices.
+
+# Keywords
+
+  - `kwargs...`: Named component mappings. This is equivalent to `Axis((; kwargs...))`.
+
+# Returns
+
+An [`Axis`](@ref) whose mapping is encoded in its type and therefore available to generic
+indexing without storing a runtime copy.
 
 # Examples
 
@@ -111,6 +133,9 @@ Axis(symbols::Vararg{Symbol}) = Axis(symbols)
 
 Axis marker for an unnamed, flat dimension of a `ComponentArray`.
 
+`FlatAxis` carries no named components. It is useful for a dimension that should retain
+ordinary array indexing while other dimensions carry component names.
+
 # Examples
 
 ```jldoctest
@@ -136,6 +161,11 @@ Axis metadata that preserves the shape of a multidimensional component stored in
   - `shape`: The dimensions of the component. A one-dimensional `shape` produces a
     [`Shaped1DAxis`](@ref) instead.
 
+# Returns
+
+An axis whose `size` is `shape`. For a one-dimensional shape, the constructor returns a
+[`Shaped1DAxis`](@ref) instead.
+
 # Examples
 
 ```jldoctest
@@ -155,6 +185,11 @@ Base.length(::ShapedAxis{Shape}) where {Shape} = prod(Shape)
 
 Axis marker for a one-dimensional array component. `ShapedAxis((n,))` returns a
 `Shaped1DAxis` so vector-valued components keep their one-dimensional shape.
+
+# Returns
+
+An axis whose `size` is the supplied one-dimensional shape and whose flattened length is
+the sole shape entry.
 
 # Examples
 
@@ -192,6 +227,17 @@ Axis metadata for a homogeneous array of component layouts. Constructing a
 
   - `partition_size`: Number of flat data elements in each component layout.
   - `index_map`: A `NamedTuple` or [`AbstractAxis`](@ref) describing one layout.
+
+# Fields
+
+  - `ax`: The axis representing one component layout. Its map is also encoded in the
+    `IdxMap` type parameter.
+
+# Returns
+
+A [`PartitionedAxis`](@ref) whose `size` is `partition_size`. When used in a
+`ComponentArray` constructor, the corresponding dimension is partitioned into lazy
+component arrays.
 
 # Examples
 
@@ -232,6 +278,15 @@ retrieve the component. For flat and null axes it simplifies to the bare index.
 
   - `parent_index`: Indices of the component in the parent array.
   - `index_map`: A `NamedTuple` or [`AbstractAxis`](@ref) describing the component layout.
+
+# Fields
+
+  - `ax`: The nested axis used to interpret the selected parent positions.
+
+# Returns
+
+A [`ViewAxis`](@ref) that exposes `index_map` through the positions in `parent_index`.
+When the map is flat or null, the constructor returns the bare parent index instead.
 
 # Examples
 

@@ -46,6 +46,7 @@ x = ComponentArray(b = 1, a = 2)
     @test length(axis[:left]) == 1
     @test length(axis[(:left, :right)]) == 2
     @test axis[[:left, :right]] == axis[(:left, :right)]
+    @test valkeys(axis) == (Val(:left), Val(:right))
     @test firstindex(axis) == 1
     @test lastindex(axis) == 2
 

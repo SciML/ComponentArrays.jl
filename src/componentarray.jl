@@ -6,6 +6,45 @@
 
 Array type that can be accessed like an arbitrary nested mutable struct.
 
+The component layout is stored in the `axes` field and the flat backing storage is stored
+in the `data` field. Component access through properties, symbols, and `Val` values is
+translated into indexing operations on `data`.
+
+# Type Parameters
+
+  - `T`: Element type of the backing array.
+  - `N`: Number of dimensions of the backing array.
+  - `A`: Concrete backing-array type.
+  - `Axes`: Tuple of [`AbstractAxis`](@ref) values, one per array dimension.
+
+# Fields
+
+  - `data::A`: The backing array containing the flattened component values.
+  - `axes::Axes`: The static component metadata used for named and nested indexing.
+
+# Arguments
+
+  - `nt::NamedTuple` or `AbstractDict`: Nested component values from which both the
+    backing array and axes are inferred.
+  - `data`: An array containing the values to wrap.
+  - `ax`: One axis per dimension of `data`; use [`Axis`](@ref), [`FlatAxis`](@ref), or
+    another [`AbstractAxis`](@ref) implementation.
+  - `ComponentArray{T}`: Convert inferred or supplied values to element type `T`.
+
+# Keywords
+
+  - `kwargs...`: Named component values, equivalent to passing a `NamedTuple`.
+
+# Returns
+
+A `ComponentArray` that preserves the supplied backing storage and component metadata.
+Construction from a `PartitionedAxis` returns a lazy array of component arrays.
+
+# Throws
+
+`DimensionMismatch` when a `ComponentVector` or `ComponentMatrix` alias receives an
+array with the wrong number of dimensions.
+
 # Examples
 
 ```jldoctest
@@ -117,6 +156,31 @@ function fill_componentarray_ka! end # defined in extensions
     x = ComponentVector{T}(args...; kwargs...) where {T}
 
 A `ComponentVector` is an alias for a one-dimensional `ComponentArray`.
+
+# Arguments
+
+  - `nt`, `data`, and `ax`: The same inputs accepted by [`ComponentArray`](@ref), with
+    `data` required to be one-dimensional when supplied directly.
+
+# Returns
+
+A one-dimensional `ComponentArray` with component-aware indexing.
+
+# Throws
+
+`DimensionMismatch` if direct array input is not one-dimensional.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> x = ComponentVector(a = 1, b = 2)
+ComponentVector{Int64}(a = 1, b = 2)
+
+julia> size(x)
+(2,)
+```
 """
 const ComponentVector{T, A, Axes} = ComponentArray{T, 1, A, Axes}
 ComponentVector(nt) = ComponentArray(nt)
@@ -146,6 +210,31 @@ ComponentVector{T}(x::ComponentVector) where {T} = T.(x)
     x = ComponentMatrix{T}(data::AbstractMatrix, ax...) where {T}
 
 A `ComponentMatrix` is an alias for a two-dimensional `ComponentArray`.
+
+# Arguments
+
+  - `data`: A two-dimensional backing array.
+  - `ax...`: One axis per matrix dimension.
+  - `T`: Optional element type used by the `undef` constructor.
+
+# Returns
+
+A two-dimensional `ComponentArray` with component-aware indexing.
+
+# Throws
+
+`DimensionMismatch` if direct array input is not two-dimensional.
+
+# Examples
+
+```jldoctest
+julia> using ComponentArrays
+
+julia> x = ComponentMatrix(reshape(1:4, 2, 2), FlatAxis(), FlatAxis());
+
+julia> size(x)
+(2, 2)
+```
 """
 const ComponentMatrix{T, A, Axes} = ComponentArray{T, 2, A, Axes}
 ComponentMatrix{T}(::UndefInitializer, ax...) where {T} = ComponentArray{T}(undef, ax...)
@@ -339,6 +428,15 @@ Return the backing array of a `ComponentArray`. For ordinary arrays and scalars,
 returns its argument unchanged; this makes generic code work with both wrapped and
 unwrapped values.
 
+# Arguments
+
+  - `x`: A `ComponentArray`, an adjoint/transpose of one, or an ordinary value.
+
+# Returns
+
+The ordinary backing value associated with `x`. For an ordinary value, returns `x`
+unchanged.
+
 # Examples
 
 ```jldoctest
@@ -363,6 +461,15 @@ julia> getdata(x)
 
 Access `.axes` field of a `ComponentArray`. This is different than `axes(x::ComponentArray)`, which
 returns the axes of the contained array.
+
+# Arguments
+
+  - `x`: A `ComponentArray`, an adjoint/transpose of one, a tuple of axes, or a type
+    carrying component-axis metadata.
+
+# Returns
+
+The component-axis metadata associated with `x`, represented as a tuple of axes.
 
 # Examples
 
@@ -429,6 +536,14 @@ getaxes(x) = ()
 
 Returns `Val`-wrapped keys of `ComponentVector` for fast iteration over component keys. Also works
 directly on an `AbstractAxis`.
+
+# Arguments
+
+  - `x`: A `ComponentVector` or [`AbstractAxis`](@ref).
+
+# Returns
+
+A tuple of `Val` objects in the same order as `keys(x)`.
 
 # Examples
 

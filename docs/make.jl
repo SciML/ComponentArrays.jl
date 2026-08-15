@@ -13,6 +13,7 @@ makedocs(;
         "Home" => "index.md",
         "Quick Start" => "quickstart.md",
         "Indexing Behavior" => "indexing_behavior.md",
+        "Interfaces" => "interfaces.md",
         "Unpacking to StaticArrays" => "static_unpack.md",
         "Examples" => [
             "examples/DiffEqFlux.md",

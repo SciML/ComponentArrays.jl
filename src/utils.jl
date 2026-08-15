@@ -5,6 +5,16 @@
 Deprecated helper for converting symbolic indices to `Val` wrappers. Use `Val`
 constructors directly instead.
 
+# Arguments
+
+  - `i...`: Symbols or other values accepted by `Val`.
+
+# Returns
+
+A tuple of `Val` wrappers. The tuple form and varargs form are equivalent.
+
+This function emits a deprecation warning; call `Val.(...)` directly in new code.
+
 # Examples
 
 ```julia

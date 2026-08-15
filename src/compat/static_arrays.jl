@@ -23,6 +23,21 @@ Unpack fields from a `ComponentVector`, converting plain array fields to
 `StaticArrays` values when their sizes are known from the component axes.
 Scalar fields and nested `ComponentArray`s are returned unchanged.
 
+# Arguments
+
+  - `lhs`: One variable or a tuple of variables receiving the unpacked fields.
+  - `rhs`: A `ComponentVector` expression.
+
+# Returns
+
+Assignments to the variables in `lhs`; plain array fields with static shapes become
+`StaticArrays` values.
+
+# Throws
+
+An `AssertionError` if the left-hand side is not an assignment, or an `ErrorException`
+if the assignment target is not a symbol or tuple of symbols.
+
 # Examples
 
 ```jldoctest
