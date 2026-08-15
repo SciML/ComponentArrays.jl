@@ -63,6 +63,7 @@ function ComponentArray(data, ax::NotPartitionedAxis...)
 end
 function ComponentArray(data, ax::AbstractAxis...)
     part_axs = filter_by_type(PartitionedAxis, ax...)
+    isempty(part_axs) && return ComponentArray(data, ax)
     part_data = partition(data, size.(part_axs)...)
     axs = Axis.(ax)
     # return [ComponentArray(x, axs...) for x in part_data]

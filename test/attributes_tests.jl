@@ -44,4 +44,13 @@ x = ComponentArray(b = 1, a = 2)
     @test keys(axis) == (:left, :right)
     @test axis[:left].idx == 1
     @test axis[:right].idx == 2
+    @test axis[Val(:left)].idx == 1
+    @test axis[(:left, :right)].idx == [1, 2]
+    @test firstindex(axis) == 1
+    @test lastindex(axis) == 2
+
+    x = ComponentArray([10, 20], axis)
+    @test x isa ComponentArray
+    @test getdata(x) == [10, 20]
+    @test getaxes(x) == (axis,)
 end

@@ -15,12 +15,23 @@ names and shaped views onto positions in the wrapped array.
 Subtypes represent static component metadata. A subtype must use an `IdxMap` whose keys
 are the component names accepted by the axis and whose values are valid component
 indices, ranges, nested named tuples, or axis metadata supported by `ComponentArray`.
-The map must describe the same component layout for every instance of the subtype.
+The map must describe the same component layout for every instance of the subtype, and
+the subtype must be constructible without storing a second, runtime copy of the map.
 
-Generic `keys(axis)` and `axis[name]` methods derive their behavior from `IdxMap`;
-subtypes normally do not need to implement them. Define a custom subtype only when a
-distinct axis representation is required. Use [`Axis`](@ref) for ordinary named component
-layouts.
+The generic interface is derived from `IdxMap`; a subtype normally does not implement
+any methods itself:
+
+  - `keys(axis)` returns the component names in `IdxMap` order.
+  - `axis[name]` and `axis[Val(name)]` return a `ComponentIndex` for one named component.
+  - `axis[names]`, where `names` is a tuple or array of symbols, returns one
+    `ComponentIndex` whose indices are concatenated in the requested order.
+  - `firstindex(axis)` and `lastindex(axis)` describe the first and last flattened
+    positions represented by the map.
+
+When an axis is passed to [`ComponentArray`](@ref), its map must describe exactly the
+component positions in the supplied data, including any nested or shaped metadata.
+Define a custom subtype only when a distinct, statically known axis representation is
+required. Use [`Axis`](@ref) for ordinary named component layouts.
 
 # Examples
 
