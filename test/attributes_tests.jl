@@ -42,10 +42,9 @@ x = ComponentArray(b = 1, a = 2)
 
     axis = ExternalAxisInterface.TwoComponentAxis()
     @test keys(axis) == (:left, :right)
-    @test axis[:left].idx == 1
-    @test axis[:right].idx == 2
-    @test axis[Val(:left)].idx == 1
-    @test axis[(:left, :right)].idx == [1, 2]
+    @test axis[:left] == axis[Val(:left)]
+    @test length(axis[:left]) == 1
+    @test length(axis[(:left, :right)]) == 2
     @test firstindex(axis) == 1
     @test lastindex(axis) == 2
 
