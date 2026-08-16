@@ -31,6 +31,10 @@ entries. Use `KeepIndex` when a symbolic, integer, or range lookup should return
   - `idx`: A component name, flat index, range, or `:` accepted by `ComponentArray`
     indexing. Integer indices are converted to a one-element range.
 
+# Returns
+
+A `KeepIndex` wrapper consumed by `getindex`; it is not itself an array index.
+
 # Examples
 
 ```jldoctest

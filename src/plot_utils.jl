@@ -1,7 +1,16 @@
 """
     labels(x::ComponentVector)
 
-Get string labels for for each index of a `ComponentVector`. Useful for automatic plot legend labelling.
+Get string labels for each index of a `ComponentVector`. Useful for automatic plot legend labelling.
+
+# Arguments
+
+  - `x`: A component array or nested component-array structure to label.
+
+# Returns
+
+A vector of strings, one for each flattened component position. Nested fields use dot
+notation and array indices use bracket notation.
 
 # Examples
 
@@ -48,6 +57,16 @@ _labels(x) = ""
     label2index(label_array, str::AbstractString)
 
 Convert labels made by `labels` function to an array of flat indices of a `ComponentVector`.
+
+# Arguments
+
+  - `x`: A `ComponentVector` or a vector of labels returned by [`labels`](@ref).
+  - `str`: A complete or prefix label to look up.
+
+# Returns
+
+A vector of flat indices matching `str`. Prefix matches include all nested component
+positions below that label.
 
 # Examples
 
