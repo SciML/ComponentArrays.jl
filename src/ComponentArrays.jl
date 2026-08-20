@@ -56,4 +56,6 @@ export @static_unpack
 
 include("compat/functors.jl")
 
+include("precompile.jl")
+
 end
