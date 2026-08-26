@@ -85,24 +85,25 @@ function Base.vcat(x::AbstractComponentVecOrMat{<:Number}, y::AbstractComponentV
         return ComponentArray(vcat(data_x, data_y), Axis((; idxmap_x..., idxmap_y...)), getaxes(x)[2:end]...)
     end
 end
-function Base.vcat(x::CV...) where {CV <: AdjOrTransComponentArray{<:Number}}
-    return ComponentArray(reduce(vcat, map(y -> getdata(y.parent)', x)), getaxes(x[1]))
+function Base.vcat(
+        x::ComponentVector{<:Number}, y::AbstractComponentArray,
+        z::AbstractComponentArray, args::Vararg{AbstractComponentArray}
+    )
+    return vcat(getdata(x), getdata(y), getdata(z), getdata.(args)...)
 end
-Base.vcat(x::ComponentVector{<:Number}, args...) = vcat(getdata(x), getdata.(args)...)
+function Base.vcat(
+        x::AdjOrTransComponentArray{<:Number},
+        ys::Vararg{AdjOrTransComponentArray{<:Number}}
+    )
+    arrays = (x, ys...)
+    return ComponentArray(reduce(vcat, map(y -> getdata(parent(y))', arrays)), getaxes(x))
+end
 function Base.vcat(
         x::ComponentVector{<:Number},
         args::Vararg{Union{Number, UniformScaling, AbstractVecOrMat{<:Number}}}
     )
     return vcat(getdata(x), getdata.(args)...)
 end
-function Base.vcat(
-        x::ComponentVector{<:Number}, args::Vararg{
-            AbstractVector{T}, N,
-        }
-    ) where {T <: Number, N}
-    return vcat(getdata(x), getdata.(args)...)
-end
-
 function Base.hvcat(row_lengths::NTuple{N, Int}, xs::Vararg{AbstractComponentVecOrMat}) where {N}
     i = 1
     idxs = UnitRange{Int}[]
@@ -125,17 +126,6 @@ function Base.IndexStyle(::Type{<:ComponentArray{T, N, <:A, <:Axes}}) where {T, 
     return IndexStyle(A)
 end
 
-# Since we aren't really using the standard approach to indexing, this will forward things to
-# the correct methods
-Base.to_indices(x::ComponentArray, i::Tuple{Any}) = i
-function Base.to_indices(
-        x::ComponentArray, i::NTuple{
-            N, Union{Integer, CartesianIndex},
-        }
-    ) where {N}
-    return i
-end
-Base.to_indices(x::ComponentArray, i::NTuple{N, Int64}) where {N} = i
 Base.to_index(x::ComponentArray, i) = i
 
 # Get ComponentArray index
@@ -149,7 +139,8 @@ end
 Base.@propagate_inbounds Base.getindex(x::ComponentArray, ::Colon) = getdata(x)[:]
 Base.@propagate_inbounds Base.getindex(x::ComponentArray, ::Colon, ::Vararg{Colon}) = x
 @inline Base.getindex(x::ComponentArray, idx...) = getindex(x, toval.(idx)...)
-@inline Base.getindex(x::ComponentArray, idx::Vararg{Val}) = _getindex(getindex, x, idx...)
+@inline Base.getindex(x::ComponentArray, idx::Val, idxs::Vararg{Val}) =
+    _getindex(getindex, x, idx, idxs...)
 
 # Set ComponentArray index
 Base.@propagate_inbounds Base.setindex!(
@@ -157,7 +148,8 @@ Base.@propagate_inbounds Base.setindex!(
 ) = setindex!(getdata(x), v, idx...)
 Base.@propagate_inbounds Base.setindex!(x::ComponentArray, v, ::Colon) = setindex!(getdata(x), v, :)
 @inline Base.setindex!(x::ComponentArray, v, idx...) = setindex!(x, v, toval.(idx)...)
-@inline Base.setindex!(x::ComponentArray, v, idx::Vararg{Val}) = _setindex!(x, v, idx...)
+@inline Base.setindex!(x::ComponentArray, v, idx::Val, idxs::Vararg{Val}) =
+    _setindex!(x, v, idx, idxs...)
 
 # Explicitly view
 Base.@propagate_inbounds Base.view(
@@ -166,11 +158,13 @@ Base.@propagate_inbounds Base.view(
 Base.@propagate_inbounds Base.view(x::ComponentArray, idx...) = _getindex(view, x, toval.(idx)...)
 
 Base.@propagate_inbounds Base.maybeview(
-    x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}
-) = Base.maybeview(getdata(x), idx...)
+    x::ComponentArray, idx::ComponentArrays.FlatIdx,
+    idxs::Vararg{ComponentArrays.FlatIdx}
+) = Base.maybeview(getdata(x), idx, idxs...)
 Base.@propagate_inbounds Base.maybeview(
-    x::ComponentArray, idx...
-) = _getindex(Base.maybeview, x, toval.(idx)...)
+    x::ComponentArray, idx::Union{Symbol, Val, KeepIndex},
+    idxs::Vararg{Union{Symbol, Val, KeepIndex}}
+) = _getindex(Base.maybeview, x, toval(idx), toval.(idxs)...)
 
 # Generated get and set index methods to do all of the heavy lifting in the type domain
 @generated function _getindex(index_fun, x::ComponentArray, idx...)
@@ -215,7 +209,6 @@ for f in [:device, :stride_rank, :contiguous_axis, :contiguous_batch_size, :dens
     ) where {T, N, A, Axes} = StaticArrayInterface.$f(A)
 end
 
-Base.stride(x::ComponentArray, k) = stride(getdata(x), k)
-Base.stride(x::ComponentArray, k::Int64) = stride(getdata(x), k)
+Base.stride(x::ComponentArray, k::Integer) = stride(getdata(x), k)
 
 ArrayInterface.parent_type(::Type{ComponentArray{T, N, A, Axes}}) where {T, N, A, Axes} = A

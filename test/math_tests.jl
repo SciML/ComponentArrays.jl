@@ -58,6 +58,8 @@ x = ComponentArray(;
 
 vca2 = vcat(ca2', ca2')
 hca2 = hcat(ca2, ca2)
+@test vca2 isa ComponentArray
+@test getaxes(vca2) == getaxes(ca2')
 temp = ComponentVector(q = 100, r = rand(3, 3, 3))
 vtempca = [temp; ca]
 @test all(vca2[1, :] .== ca2)
