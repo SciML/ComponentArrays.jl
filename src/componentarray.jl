@@ -288,7 +288,6 @@ allocate_numeric_container(::Type) = []
 
 # For making ComponentArrays from named tuples
 make_carray_args(::NamedTuple{(), Tuple{}}) = (Any[], FlatAxis())
-make_carray_args(::Type{T}, ::NamedTuple{(), Tuple{}}) where {T} = (T[], FlatAxis())
 function make_carray_args(nt)
     data, ax = make_carray_args(Vector, nt)
     data = length(data) == 1 ? [data[1]] : map(identity, data)

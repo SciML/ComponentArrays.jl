@@ -1,4 +1,4 @@
-using SciMLTesting, ComponentArrays, Test
+using SciMLTesting, ComponentArrays, LinearAlgebra, Test
 using JET
 
 # ExplicitImports only walks an extension that is actually loaded (it resolves each
@@ -24,10 +24,18 @@ end
 
 run_qa(
     ComponentArrays;
-    # ComponentArrays has real method ambiguities and unbound type parameters in its
-    # vcat/hcat/getindex/Axis overloads; these are long-standing design realities, not
-    # tracked-broken placeholders, so disable the sub-checks rather than fail.
-    aqua_kwargs = (; ambiguities = false, unbound_args = false),
+    # These generic operations are required to interoperate with Base, stdlib, and
+    # foreign array/AD types. Aqua reports their intersections with Base, LinearAlgebra,
+    # Static, StructArrays, SparseArrays, Tracker, ReverseDiff, and Reactant methods;
+    # its function-level allowlist is the narrowest way to exclude those external pairs.
+    aqua_kwargs = (;
+        ambiguities = (;
+            exclude = [
+                Base.vcat, Base.copyto!, Base.:(==), LinearAlgebra.ldiv!,
+                Base.:(*), Base.getindex, Base.Broadcast.axistype, Base.similar,
+            ],
+        ),
+    ),
     ei_kwargs = (;
         all_qualified_accesses_are_public = (;
             ignore = (

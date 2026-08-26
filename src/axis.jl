@@ -123,7 +123,7 @@ julia> ca.c.b
 struct Axis{IdxMap} <: AbstractAxis{IdxMap} end
 @inline Axis(IdxMap::NamedTuple) = Axis{IdxMap}()
 Axis(; kwargs...) = Axis((; kwargs...))
-function Axis(symbols::Union{AbstractVector{Symbol}, NTuple{N, Symbol}}) where {N}
+function Axis(symbols::Union{AbstractVector{Symbol}, Tuple{Vararg{Symbol}}})
     return Axis(NamedTuple{(symbols...,)}((eachindex(symbols)...,)))
 end
 Axis(symbols::Vararg{Symbol}) = Axis(symbols)
@@ -389,9 +389,9 @@ end
 } = ComponentIndex(getproperty(IdxMap, s))
 function Base.getindex(
         ax::AbstractAxis, syms::Union{
-            NTuple{N, Symbol}, <:AbstractArray{Symbol},
+            Tuple{Vararg{Symbol}}, <:AbstractArray{Symbol},
         }
-    ) where {N}
+    )
     @assert allunique(syms) "Indexing symbols must all be unique. Got $syms"
     c_inds = getindex.((ax,), syms)
     inds = map(x -> x.idx, c_inds)
