@@ -307,10 +307,10 @@ function make_idx(data, nt::Union{NamedTuple, AbstractDict}, last_val)
     kvs = (;
         (
             k => begin
-                    inds = make_idx(data, v, lv[])[2]
-                    lv[] = last_index(inds)
-                    inds
-                end
+                inds = make_idx(data, v, lv[])[2]
+                lv[] = last_index(inds)
+                inds
+            end
                 for (k, v) in pairs(nt)
         )...,
     )
