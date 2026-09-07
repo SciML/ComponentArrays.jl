@@ -129,6 +129,17 @@ end
     @test eltype(getdata(ps_data)) <: Float64
 end
 
+@testset "Tracker convert" begin
+    nested = ComponentArray(
+        a = 100.0,
+        b = [4.0, 1.3],
+        c = (a = (a = 1.0, b = [1.0, 4.4]), b = [0.4, 2.0, 1.0, 45.0]),
+    )
+    tr = Tracker.param(nested)
+    converted = convert(typeof(nested), tr)
+    @test converted.a == nested.a
+end
+
 @testset "ArrayInterface restructure TrackedArray" begin
     ps = ComponentArray(; a = rand(2), b = (; c = rand(2)))
     ps_tracked = Tracker.param(ps)

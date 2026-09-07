@@ -1,7 +1,6 @@
 [Core]
 versions = ["lts", "1", "pre"]
 
-# Hard-failing 32-bit lane (BFloat16s/NNlib/Tracker may still hit LLVM soft-promote on i686).
 ["Core 32-bit"]
 group = "Core"
 versions = ["1"]

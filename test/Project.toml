@@ -12,7 +12,6 @@ SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 SciMLTesting = "09d9d899-5365-40a9-917a-5f67fddea283"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
@@ -28,5 +27,4 @@ SafeTestsets = "0.0.1, 0.1"
 SciMLTesting = "2.4"
 StaticArrays = "1.9.18"
 Test = "1"
-Tracker = "0.2.38"
 Unitful = "1.28.0"
