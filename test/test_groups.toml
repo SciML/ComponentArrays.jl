@@ -1,13 +1,11 @@
 [Core]
 versions = ["lts", "1", "pre"]
 
-# BFloat16s/NNlib/Tracker hit LLVM "soft promote" errors on i686 Julia.
 ["Core 32-bit"]
 group = "Core"
 versions = ["1"]
 os = ["ubuntu-latest"]
 arch = "x86"
-continue_on_error = true
 
 [Autodiff]
 versions = ["lts", "1", "pre"]
