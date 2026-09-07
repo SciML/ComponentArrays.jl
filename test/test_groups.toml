@@ -1,6 +1,12 @@
 [Core]
 versions = ["lts", "1", "pre"]
 
+["Core 32-bit"]
+group = "Core"
+versions = ["1"]
+os = ["ubuntu-latest"]
+arch = "x86"
+
 [Autodiff]
 versions = ["lts", "1", "pre"]
 in_all = false
