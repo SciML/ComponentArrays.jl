@@ -1,6 +1,7 @@
 module ComponentArraysOptimisersExt
 
-using ComponentArrays, Optimisers
+using ComponentArrays
+using Optimisers: Optimisers, AbstractRule
 
 # Optimisers can handle componentarrays by default, but we can vectorize the entire
 # operation here instead of doing multiple smaller operations

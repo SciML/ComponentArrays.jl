@@ -5,8 +5,9 @@ import StaticArrayInterface, ArrayInterface, Functors
 import ConstructionBase
 import Adapt
 
-using LinearAlgebra
-using StaticArraysCore: StaticArray, SArray, SVector, SMatrix
+using LinearAlgebra: LinearAlgebra, Adjoint, Cholesky, ColumnNorm, Diagonal, I, LU,
+    NoPivot, RowMaximum, RowNonZero, Transpose, UniformScaling, axpby!, axpy!, ldiv!
+using StaticArraysCore: StaticArray, SArray, SVector
 
 const FlatIdx = Union{Integer, CartesianIndex, CartesianIndices, AbstractArray{<:Integer}}
 const FlatOrColonIdx = Union{FlatIdx, Colon}
@@ -54,5 +55,7 @@ include("compat/static_arrays.jl")
 export @static_unpack
 
 include("compat/functors.jl")
+
+include("precompile.jl")
 
 end

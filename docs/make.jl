@@ -13,13 +13,15 @@ makedocs(;
         "Home" => "index.md",
         "Quick Start" => "quickstart.md",
         "Indexing Behavior" => "indexing_behavior.md",
+        "Interfaces" => "interfaces.md",
         "Unpacking to StaticArrays" => "static_unpack.md",
         "Examples" => [
             "examples/DiffEqFlux.md",
             "examples/adaptive_control.md",
-            "examples/ODE_jac.md"
+            "examples/ODE_jac.md",
+            "examples/coulomb_control.md",
         ],
-        "API" => "api.md"
+        "API" => "api.md",
     ],
     repo = GitHub("SciML/ComponentArrays.jl"),
     sitename = "ComponentArrays.jl",

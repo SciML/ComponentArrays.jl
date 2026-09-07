@@ -91,7 +91,7 @@ julia> ca[KeepIndex(:b)]
 ComponentVector{Int64}(b = [4, 1])
 ```
 
-Now instead of just returning a plain `Vector`, this returns a `ComponentVector` that keeps the `b` name. Of course, this is still compatible with `view`s, so we could have done `@view ca[KeepIndex(:b)]` if we wanted to retain the view into the origianl.
+Now instead of just returning a plain `Vector`, this returns a `ComponentVector` that keeps the `b` name. Of course, this is still compatible with `view`s, so we could have done `@view ca[KeepIndex(:b)]` if we wanted to retain the view into the original.
 
 Similarly, we can use plain indexes like ranges or integers and they will keep the names of any components they capture:
 

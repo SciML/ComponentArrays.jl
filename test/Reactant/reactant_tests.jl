@@ -1,4 +1,5 @@
 using Reactant, ComponentArrays
+using Test
 
 x = ComponentArray(; a = rand(4), b = rand(2))
 x_ra = Reactant.to_rarray(x)

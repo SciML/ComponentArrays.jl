@@ -8,7 +8,7 @@ struct LazyArray{T, N, G} <: AbstractArray{T, N}
     gen::G
     LazyArray{T}(gen) where {T} = new{T, ndims(gen), typeof(gen)}(gen)
     function LazyArray(gen::Base.Generator{A, F}) where {A, F}
-        new{eltype(A), ndims(gen), typeof(gen)}(gen)
+        return new{eltype(A), ndims(gen), typeof(gen)}(gen)
     end
 end
 
@@ -18,7 +18,7 @@ const LazyMatrix{T, G} = LazyArray{T, 2, G}
 Base.getindex(a::LazyArray, i...) = _un_iter(getfield(a, :gen), i)
 
 function Base.setindex!(a::LazyArray, val, i...)
-    a[i...] .= val
+    return a[i...] .= val
 end
 
 _un_iter(iter, idxs) = _un_iter(iter.f, iter.iter, idxs)

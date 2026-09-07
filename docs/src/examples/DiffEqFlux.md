@@ -83,10 +83,10 @@ cb(θ, loss_n_ode(θ)...)
 
 data = Iterators.repeated((), 1000)
 
-res1 = sciml_train(loss_n_ode, θ, ADAM(0.05); cb = cb, maxiters = 100)
+res1 = sciml_train(loss_n_ode, θ, ADAM(0.05); cb, maxiters = 100)
 cb(res1.minimizer, loss_n_ode(res1.minimizer)...; doplot = true)
 
-res2 = sciml_train(loss_n_ode, res1.minimizer, LBFGS(); cb = cb)
+res2 = sciml_train(loss_n_ode, res1.minimizer, LBFGS(); cb)
 cb(res2.minimizer, loss_n_ode(res2.minimizer)...; doplot = true)
 ```
 

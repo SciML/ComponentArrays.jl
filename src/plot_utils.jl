@@ -1,8 +1,16 @@
-
 """
     labels(x::ComponentVector)
 
-Get string labels for for each index of a `ComponentVector`. Useful for automatic plot legend labelling.
+Get string labels for each index of a `ComponentVector`. Useful for automatic plot legend labelling.
+
+# Arguments
+
+  - `x`: A component array or nested component-array structure to label.
+
+# Returns
+
+A vector of strings, one for each flattened component position. Nested fields use dot
+notation and array indices use bracket notation.
 
 # Examples
 
@@ -31,16 +39,16 @@ julia> ComponentArrays.labels(x)
 
 see also [`label2index`](@ref)
 """
-labels(x::ComponentVector) = map(x->x[(firstindex(x) + 1):end], _labels(x))
-labels(x) = map(x->x[firstindex(x):end], _labels(x))
+labels(x::ComponentVector) = map(x -> x[(firstindex(x) + 1):end], _labels(x))
+labels(x) = map(x -> x[firstindex(x):end], _labels(x))
 
 _labels(x::ComponentVector) = vcat((".$(key)" .* _labels(x[key]) for key in keys(x))...)
 function _labels(x::AbstractArray{<:ComponentArray})
-    vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
+    return vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
 end
 _labels(x::LazyArray) = vcat(("[$i]" .* _labels(x[i]) for i in eachindex(x))...)
 function _labels(x::AbstractArray)
-    vcat(("[" * join(i.I, ",") * "]" for i in CartesianIndices(x))...)
+    return vcat(("[" * join(i.I, ",") * "]" for i in CartesianIndices(x))...)
 end
 _labels(x) = ""
 
@@ -49,6 +57,16 @@ _labels(x) = ""
     label2index(label_array, str::AbstractString)
 
 Convert labels made by `labels` function to an array of flat indices of a `ComponentVector`.
+
+# Arguments
+
+  - `x`: A `ComponentVector` or a vector of labels returned by [`labels`](@ref).
+  - `str`: A complete or prefix label to look up.
+
+# Returns
+
+A vector of flat indices matching `str`. Prefix matches include all nested component
+positions below that label.
 
 # Examples
 

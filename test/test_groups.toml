@@ -1,0 +1,27 @@
+[Core]
+versions = ["lts", "1", "pre"]
+
+["Core 32-bit"]
+group = "Core"
+versions = ["1"]
+os = ["ubuntu-latest"]
+arch = "x86"
+
+[Autodiff]
+versions = ["lts", "1", "pre"]
+in_all = false
+
+[GPU]
+versions = ["lts", "1", "pre"]
+in_all = false
+
+[Downstream]
+versions = ["lts", "1"]
+in_all = false
+
+[Reactant]
+versions = ["lts", "1"]
+in_all = false
+
+[QA]
+versions = ["lts", "1"]

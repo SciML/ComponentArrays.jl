@@ -107,9 +107,9 @@ plot!(step_p, solve(ODEProblem(apply_inputs(nominal_sim!; u = 1), nominal_ic, (0
     vars = 1, label = "nominal model")
 
 u = (x, p, t) -> sin(3t)
-sin_p = plot(solve(ODEProblem(apply_inputs(truth_sim!; u = u), truth_ic, (0.0, 10.0)));
+sin_p = plot(solve(ODEProblem(apply_inputs(truth_sim!; u), truth_ic, (0.0, 10.0)));
     vars = 1, label = "truth model")
-plot!(sin_p, solve(ODEProblem(apply_inputs(nominal_sim!; u = u), nominal_ic, (0.0, 10.0)));
+plot!(sin_p, solve(ODEProblem(apply_inputs(nominal_sim!; u), nominal_ic, (0.0, 10.0)));
     vars = 1, label = "nominal model")
 
 plot(step_p, sin_p; layout = (2, 1), size = (800, 800))
@@ -155,11 +155,11 @@ function feedback_sys!(D, vars, p, t; ym, r, n)
     regressor = [r, plant_model[1]]
 
     u = control(parameter_estimates, regressor)
-    yp = p.plant_fun(D.plant_model, plant_model, (), t; u = u)
+    yp = p.plant_fun(D.plant_model, plant_model, (), t; u)
     ŷ = sensor_sim!(D.sensor, sensor, (), t; u = yp[1]) + n
     e = ŷ .- ym
     regressor[2] = ŷ
-    adapt!(D.parameter_estimates, parameter_estimates, γ, t; e = e, w = regressor)
+    adapt!(D.parameter_estimates, parameter_estimates, γ, t; e, w = regressor)
     return yp
 end
 ```
@@ -172,7 +172,7 @@ function system!(D, vars, p, t; r = 0.0, n = 0.0)
     @unpack reference_model, feedback_loop = vars
 
     ym = ref_sim!(D.reference_model, reference_model, (), t; u = r)
-    yp = feedback_sys!(D.feedback_loop, feedback_loop, p, t; ym = ym, r = r, n = n)
+    yp = feedback_sys!(D.feedback_loop, feedback_loop, p, t; ym, r, n)
     return yp
 end
 ```
@@ -219,10 +219,7 @@ function simulate(plant_fun, plant_ic;
     )
 
     # Model parameters
-    p = (
-        gamma = adapt_gain,
-        plant_fun = plant_fun
-    )
+    p = (; gamma = adapt_gain, plant_fun)
 
     sim_fun = apply_inputs(system!; r = input_signal, n = deterministic_noise)
 

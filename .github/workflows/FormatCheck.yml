@@ -1,0 +1,17 @@
+name: Format Check
+on:
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'release-'
+    tags: '*'
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+jobs:
+  runic:
+    name: Format Check
+    uses: "SciML/.github/.github/workflows/runic.yml@v1"
+    secrets: "inherit"
