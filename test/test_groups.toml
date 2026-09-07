@@ -1,13 +1,12 @@
 [Core]
 versions = ["lts", "1", "pre"]
 
-# BFloat16s/NNlib/Tracker hit LLVM "soft promote" errors on i686 Julia.
+# Hard-failing 32-bit lane (BFloat16s/NNlib/Tracker may still hit LLVM soft-promote on i686).
 ["Core 32-bit"]
 group = "Core"
 versions = ["1"]
 os = ["ubuntu-latest"]
 arch = "x86"
-continue_on_error = true
 
 [Autodiff]
 versions = ["lts", "1", "pre"]
