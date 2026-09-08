@@ -55,10 +55,10 @@ temp3 = ComponentArray(temp2; e = (a = 20, b = [2 4; 1 4]))
 
 # Issue #18
 temp_miss = ComponentArray(a = missing, b = [2, 1, 4, 5], c = [1, 2, 3])
-@test eltype(temp_miss) == Union{Int64, Missing}
+@test eltype(temp_miss) == Union{Int, Missing}
 @test temp_miss.a === missing
 temp_noth = ComponentArray(a = nothing, b = [2, 1, 4, 5], c = [1, 2, 3])
-@test eltype(temp_noth) == Union{Int64, Nothing}
+@test eltype(temp_noth) == Union{Int, Nothing}
 @test temp_noth.a === nothing
 
 # Issue #61
