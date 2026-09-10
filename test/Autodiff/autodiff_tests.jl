@@ -214,6 +214,26 @@ end
         @test getdata(g[2]) ≈ [2.0, 4.0, 6.0, 8.0]
     end
 
+    # (c) Raw Array cotangent (not ComponentArray-wrapped) against a flat-Array-backed
+    #     CV fdata — the shape a plain rrule returns when it's unaware of ComponentArrays.
+    sum_abs2_rawgrad(x::AbstractArray) = sum(abs2, x)
+    function ChainRulesCore.rrule(::typeof(sum_abs2_rawgrad), x::ComponentVector)
+        y = sum_abs2_rawgrad(x)
+        sum_abs2_rawgrad_pb(Δy) = (ChainRulesCore.NoTangent(), 2 .* Δy .* getdata(x))
+        return y, sum_abs2_rawgrad_pb
+    end
+    Mooncake.@from_rrule(
+        Mooncake.DefaultCtx,
+        Tuple{typeof(sum_abs2_rawgrad), ComponentVector{Float64, Vector{Float64}}},
+    )
+    let
+        v = ComponentArray(a = 1.0, b = 2.0, c = 3.0)
+        cache = Mooncake.prepare_gradient_cache(sum_abs2_rawgrad, v)
+        val, g = Mooncake.value_and_gradient!!(cache, sum_abs2_rawgrad, v)
+        @test val ≈ 14.0
+        @test getdata(g[2]) ≈ [2.0, 4.0, 6.0]
+    end
+
     @test Mooncake.friendly_tangent_cache(flat) isa
         Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}
 
