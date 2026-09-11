@@ -214,6 +214,67 @@ end
         @test getdata(g[2]) ≈ [2.0, 4.0, 6.0, 8.0]
     end
 
+    # (c) Raw Array cotangent (not ComponentArray-wrapped) against a flat-Array-backed
+    #     CV fdata — the shape a plain rrule returns when it's unaware of ComponentArrays.
+    sum_abs2_rawgrad(x::AbstractArray) = sum(abs2, x)
+    function ChainRulesCore.rrule(::typeof(sum_abs2_rawgrad), x::ComponentVector)
+        y = sum_abs2_rawgrad(x)
+        sum_abs2_rawgrad_pb(Δy) = (ChainRulesCore.NoTangent(), 2 .* Δy .* getdata(x))
+        return y, sum_abs2_rawgrad_pb
+    end
+    Mooncake.@from_rrule(
+        Mooncake.DefaultCtx,
+        Tuple{typeof(sum_abs2_rawgrad), ComponentVector{Float64, Vector{Float64}}},
+    )
+    let
+        v = ComponentArray(a = 1.0, b = 2.0, c = 3.0)
+        cache = Mooncake.prepare_gradient_cache(sum_abs2_rawgrad, v)
+        val, g = Mooncake.value_and_gradient!!(cache, sum_abs2_rawgrad, v)
+        @test val ≈ 14.0
+        @test getdata(g[2]) ≈ [2.0, 4.0, 6.0]
+    end
+
+    # (d) Same as (c), but for a genuine ComponentMatrix (N=2) fdata, not just a
+    #     ComponentVector — `ComponentArray(a = <matrix>, ...)` actually produces a
+    #     ComponentVector whose fields are matrix-shaped views, so a real ComponentMatrix
+    #     needs `ComponentMatrix(data, Axis(...), Axis(...))`.
+    sum_abs2_rawgrad_mat(x::AbstractArray) = sum(abs2, x)
+    function ChainRulesCore.rrule(::typeof(sum_abs2_rawgrad_mat), x::ComponentMatrix)
+        y = sum_abs2_rawgrad_mat(x)
+        pb(Δy) = (ChainRulesCore.NoTangent(), 2 .* Δy .* getdata(x))
+        return y, pb
+    end
+    Mooncake.@from_rrule(
+        Mooncake.DefaultCtx,
+        Tuple{typeof(sum_abs2_rawgrad_mat), ComponentMatrix{Float64, Matrix{Float64}}},
+    )
+    let
+        cm = ComponentMatrix(Matrix(reshape(1.0:6.0, 2, 3)), Axis(r = 1:2), Axis(c = 1:3))
+        cache = Mooncake.prepare_gradient_cache(sum_abs2_rawgrad_mat, cm)
+        val, g = Mooncake.value_and_gradient!!(cache, sum_abs2_rawgrad_mat, cm)
+        @test val ≈ sum(abs2, getdata(cm))
+        @test getdata(g[2]) ≈ 2 .* getdata(cm)
+    end
+
+    # (e) A cotangent whose dimensionality doesn't match fdata's (e.g. a Vector cotangent
+    #     for a ComponentMatrix fdata) must fail loudly rather than silently broadcast
+    #     against the wrong shape (a length-matching Vector can broadcast validly-but-
+    #     wrongly against a same-length-first-dimension Matrix).
+    sum_abs2_badshape(x::AbstractArray) = sum(abs2, x)
+    function ChainRulesCore.rrule(::typeof(sum_abs2_badshape), x::ComponentMatrix)
+        y = sum_abs2_badshape(x)
+        pb(Δy) = (ChainRulesCore.NoTangent(), ones(size(getdata(x), 1)))  # wrong shape
+        return y, pb
+    end
+    Mooncake.@from_rrule(
+        Mooncake.DefaultCtx,
+        Tuple{typeof(sum_abs2_badshape), ComponentMatrix{Float64, Matrix{Float64}}},
+    )
+    let
+        cm = ComponentMatrix(Matrix(reshape(1.0:6.0, 2, 3)), Axis(r = 1:2), Axis(c = 1:3))
+        @test_throws ArgumentError Mooncake.prepare_gradient_cache(sum_abs2_badshape, cm)
+    end
+
     @test Mooncake.friendly_tangent_cache(flat) isa
         Mooncake.FriendlyTangentCache{Mooncake.AsPrimal}
 

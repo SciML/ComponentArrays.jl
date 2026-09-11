@@ -313,6 +313,18 @@ function Mooncake.increment_and_get_rdata!(f::P, ::Mooncake.NoRData, t::P) where
     return Mooncake.NoRData()
 end
 
+# Bare Array cotangent into the new FlatComponentArray fdata -- mirrors case (a)
+# above, for the native tangent-type shape instead of the old FData wrapper. N is
+# pinned to match between f and t: a dimensionality mismatch (e.g. a Vector cotangent
+# for a ComponentMatrix fdata) must fail to dispatch here rather than silently
+# broadcast against an unrelated shape.
+function Mooncake.increment_and_get_rdata!(
+        f::P, ::Mooncake.NoRData, t::Array{T, N},
+    ) where {T <: _FloatLike, N, P <: FlatComponentArray{T, N}}
+    getdata(f) .+= t
+    return Mooncake.NoRData()
+end
+
 function Mooncake.__verify_fdata_value(::IdDict{Any, Nothing}, p::FlatComponentArray, f::FlatComponentArray)
     if size(p) != size(f)
         throw(Mooncake.InvalidFDataException("p has size $(size(p)) but f has size $(size(f))"))
