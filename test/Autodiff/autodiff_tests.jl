@@ -118,6 +118,22 @@ end
     Δ = only(Zygote.gradient(mysum, rand(10)))
 
     @test Δ isa AbstractVector{Float64}
+
+    # Issue #22: the keyword/NamedTuple `ComponentArray` constructor was not
+    # differentiable when a component was itself a `ComponentArray`.
+    θ22 = ComponentArray(
+        u = [1.0, 2.0],
+        p = ComponentArray(W = [1.0 2.0; 3.0 4.0], b = [5.0, 6.0]),
+    )
+    function ctor_loss(θ)
+        θ2 = ComponentArray(u = θ.u, p = θ.p, other = [7.0, 8.0, 9.0])
+        return sum(abs2, θ2.u) + 3 * sum(θ2.p.W) + sum(abs2, θ2.p.b)
+    end
+
+    finite22 = FiniteDiff.finite_difference_gradient(ctor_loss, θ22)
+    zygote22 = only(Zygote.gradient(ctor_loss, θ22))
+
+    @test ComponentArray(zygote22) ≈ ComponentArray(finite22)
 end
 
 @testset "Tracker untrack" begin

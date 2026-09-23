@@ -12,6 +12,19 @@ function getproperty_adjoint(Δ, x, s)
     return (ChainRulesCore.NoTangent(), zero_x, ChainRulesCore.NoTangent())
 end
 
+# Composite tangents for a component property arrive as `Tangent{<:Any, <:NamedTuple}`
+# (or occasionally a bare `NamedTuple`), which has no usable `eltype` and cannot be
+# written into the flat backing vector. Unbox to a `ComponentArray` first.
+function getproperty_adjoint(Δ::ChainRulesCore.Tangent{<:Any, <:NamedTuple}, x, s)
+    return getproperty_adjoint(ComponentArray(_unbox(Δ)), x, s)
+end
+
+getproperty_adjoint(Δ::NamedTuple, x, s) = getproperty_adjoint(ComponentArray(_unbox(Δ)), x, s)
+
+_unbox(x) = x
+_unbox(nt::NamedTuple) = map(_unbox, nt)
+_unbox(t::ChainRulesCore.Tangent) = _unbox(ChainRulesCore.backing(t))
+
 __setproperty!(x, s, Δ) = __setproperty!(Val(false), x, s, Δ)
 function __setproperty!(::Val{false}, x, s, Δ)
     setproperty!(x, s, Δ)
