@@ -22,21 +22,24 @@ function getproperty_adjoint(Δ::NamedTuple, x, s)
 end
 
 function _tangent_eltype(Δ, fallback)
+    T = fallback
     for (_, v) in pairs(Δ)
+        v = ChainRulesCore.unthunk(v)
         v isa ChainRulesCore.AbstractZero && continue
         if v isa AbstractArray
-            return eltype(v)
+            T = promote_type(T, eltype(v))
         elseif v isa Number
-            return typeof(v)
+            T = promote_type(T, typeof(v))
         elseif v isa NamedTuple || v isa ChainRulesCore.Tangent
-            return _tangent_eltype(v, fallback)
+            T = promote_type(T, _tangent_eltype(v, fallback))
         end
     end
-    return fallback
+    return T
 end
 
 function _fill_named_tangent!(z, Δ)
     for (k, v) in pairs(Δ)
+        v = ChainRulesCore.unthunk(v)
         v isa ChainRulesCore.AbstractZero && continue
         if v isa NamedTuple || v isa ChainRulesCore.Tangent
             _fill_named_tangent!(getproperty(z, k), v)

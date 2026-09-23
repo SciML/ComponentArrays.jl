@@ -161,6 +161,33 @@ end
     _, g_nested, _ = ComponentArrays.getproperty_adjoint(Δ_nested, θ_nest, :x)
     @test g_nested.x.y.b == [3.0, 4.0]
     @test g_nested.x.y.W == 2 .* ones(2, 2)
+
+    # Mixed Float32/Float64: promote eltype so Float64 values are not truncated.
+    Δ_mixed = ChainRulesCore.Tangent{typeof(p)}(;
+        b = Float32[1.0f0, 2.0f0], W = Float64[1.5 2.5; 3.5 4.5],
+    )
+    _, g_mixed, _ = ComponentArrays.getproperty_adjoint(Δ_mixed, θ_adj, :p)
+    @test eltype(g_mixed) === Float64
+    @test g_mixed.p.b == [1.0, 2.0]
+    @test g_mixed.p.W == Float64[1.5 2.5; 3.5 4.5]
+
+    # Float64 then Dual: promote to Dual (not MethodError Float64(::Dual)).
+    D = typeof(ForwardDiff.Dual(1.0))
+    Δ_dual = ChainRulesCore.Tangent{typeof(p)}(;
+        b = [1.0, 2.0], W = ones(D, 2, 2),
+    )
+    _, g_dual, _ = ComponentArrays.getproperty_adjoint(Δ_dual, θ_adj, :p)
+    @test eltype(g_dual) <: ForwardDiff.Dual
+    @test g_dual.p.b == D[1.0, 2.0]
+    @test g_dual.p.W == ones(D, 2, 2)
+
+    # Thunked tangent fields must be unthunked before fill.
+    Δ_thunk = ChainRulesCore.Tangent{typeof(p)}(;
+        W = ChainRulesCore.@thunk(ones(2, 2)), b = [1.0, 2.0],
+    )
+    _, g_thunk, _ = ComponentArrays.getproperty_adjoint(Δ_thunk, θ_adj, :p)
+    @test g_thunk.p.b == [1.0, 2.0]
+    @test g_thunk.p.W == ones(2, 2)
 end
 
 @testset "Tracker untrack" begin
