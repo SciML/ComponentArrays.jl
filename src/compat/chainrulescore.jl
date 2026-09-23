@@ -12,18 +12,45 @@ function getproperty_adjoint(Δ, x, s)
     return (ChainRulesCore.NoTangent(), zero_x, ChainRulesCore.NoTangent())
 end
 
-# Composite tangents for a component property arrive as `Tangent{<:Any, <:NamedTuple}`
-# (or occasionally a bare `NamedTuple`), which has no usable `eltype` and cannot be
-# written into the flat backing vector. Unbox to a `ComponentArray` first.
+# Composite NamedTuple/Tangent cotangents: fill a zero ComponentArray by field name.
 function getproperty_adjoint(Δ::ChainRulesCore.Tangent{<:Any, <:NamedTuple}, x, s)
-    return getproperty_adjoint(ComponentArray(_unbox(Δ)), x, s)
+    return getproperty_adjoint(_fill_named_tangent(getproperty(x, s), Δ), x, s)
 end
 
-getproperty_adjoint(Δ::NamedTuple, x, s) = getproperty_adjoint(ComponentArray(_unbox(Δ)), x, s)
+function getproperty_adjoint(Δ::NamedTuple, x, s)
+    return getproperty_adjoint(_fill_named_tangent(getproperty(x, s), Δ), x, s)
+end
 
-_unbox(x) = x
-_unbox(nt::NamedTuple) = map(_unbox, nt)
-_unbox(t::ChainRulesCore.Tangent) = _unbox(ChainRulesCore.backing(t))
+function _tangent_eltype(Δ, fallback)
+    for (_, v) in pairs(Δ)
+        v isa ChainRulesCore.AbstractZero && continue
+        if v isa AbstractArray
+            return eltype(v)
+        elseif v isa Number
+            return typeof(v)
+        elseif v isa NamedTuple || v isa ChainRulesCore.Tangent
+            return _tangent_eltype(v, fallback)
+        end
+    end
+    return fallback
+end
+
+function _fill_named_tangent!(z, Δ)
+    for (k, v) in pairs(Δ)
+        v isa ChainRulesCore.AbstractZero && continue
+        if v isa NamedTuple || v isa ChainRulesCore.Tangent
+            _fill_named_tangent!(getproperty(z, k), v)
+        else
+            setproperty!(z, k, v)
+        end
+    end
+    return z
+end
+
+function _fill_named_tangent(template, Δ)
+    T = _tangent_eltype(Δ, eltype(template))
+    return _fill_named_tangent!(zero(similar(template, T)), Δ)
+end
 
 __setproperty!(x, s, Δ) = __setproperty!(Val(false), x, s, Δ)
 function __setproperty!(::Val{false}, x, s, Δ)

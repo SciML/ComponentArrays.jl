@@ -119,8 +119,7 @@ end
 
     @test Δ isa AbstractVector{Float64}
 
-    # Issue #22: the keyword/NamedTuple `ComponentArray` constructor was not
-    # differentiable when a component was itself a `ComponentArray`.
+    # Nested ComponentArray inside NamedTuple constructor (Zygote vs FiniteDiff).
     θ22 = ComponentArray(
         u = [1.0, 2.0],
         p = ComponentArray(W = [1.0 2.0; 3.0 4.0], b = [5.0, 6.0]),
@@ -134,6 +133,34 @@ end
     zygote22 = only(Zygote.gradient(ctor_loss, θ22))
 
     @test ComponentArray(zygote22) ≈ ComponentArray(finite22)
+
+    # Direct getproperty_adjoint checks: fill composite tangents by name.
+    θ_adj = ComponentArray(a = 5.0, p = ComponentArray(b = [1.0, 2.0], W = ones(2, 2)))
+    p = θ_adj.p
+
+    Δ_reordered = ChainRulesCore.Tangent{typeof(p)}(; W = ones(2, 2), b = [1.0, 2.0])
+    _, g_reordered, _ = ComponentArrays.getproperty_adjoint(Δ_reordered, θ_adj, :p)
+    @test g_reordered.a == 0.0
+    @test g_reordered.p.b == [1.0, 2.0]
+    @test g_reordered.p.W == ones(2, 2)
+
+    Δ_zero = ChainRulesCore.Tangent{typeof(p)}(; b = ChainRulesCore.ZeroTangent(), W = ones(2, 2))
+    _, g_zero, _ = ComponentArrays.getproperty_adjoint(Δ_zero, θ_adj, :p)
+    @test g_zero.p.b == [0.0, 0.0]
+    @test g_zero.p.W == ones(2, 2)
+
+    Δ_missing = ChainRulesCore.Tangent{typeof(p)}(; W = ones(2, 2))
+    _, g_missing, _ = ComponentArrays.getproperty_adjoint(Δ_missing, θ_adj, :p)
+    @test g_missing.p.b == [0.0, 0.0]
+    @test g_missing.p.W == ones(2, 2)
+
+    θ_nest = ComponentArray(x = ComponentArray(y = p))
+    Δ_nested = ChainRulesCore.Tangent{typeof(θ_nest.x)}(;
+        y = ChainRulesCore.Tangent{typeof(p)}(; W = 2 .* ones(2, 2), b = [3.0, 4.0]),
+    )
+    _, g_nested, _ = ComponentArrays.getproperty_adjoint(Δ_nested, θ_nest, :x)
+    @test g_nested.x.y.b == [3.0, 4.0]
+    @test g_nested.x.y.W == 2 .* ones(2, 2)
 end
 
 @testset "Tracker untrack" begin
