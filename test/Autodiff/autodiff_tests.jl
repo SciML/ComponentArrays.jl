@@ -118,6 +118,76 @@ end
     Δ = only(Zygote.gradient(mysum, rand(10)))
 
     @test Δ isa AbstractVector{Float64}
+
+    # Nested ComponentArray inside NamedTuple constructor (Zygote vs FiniteDiff).
+    θ22 = ComponentArray(
+        u = [1.0, 2.0],
+        p = ComponentArray(W = [1.0 2.0; 3.0 4.0], b = [5.0, 6.0]),
+    )
+    function ctor_loss(θ)
+        θ2 = ComponentArray(u = θ.u, p = θ.p, other = [7.0, 8.0, 9.0])
+        return sum(abs2, θ2.u) + 3 * sum(θ2.p.W) + sum(abs2, θ2.p.b)
+    end
+
+    finite22 = FiniteDiff.finite_difference_gradient(ctor_loss, θ22)
+    zygote22 = only(Zygote.gradient(ctor_loss, θ22))
+
+    @test ComponentArray(zygote22) ≈ ComponentArray(finite22)
+
+    # Direct getproperty_adjoint checks: fill composite tangents by name.
+    θ_adj = ComponentArray(a = 5.0, p = ComponentArray(b = [1.0, 2.0], W = ones(2, 2)))
+    p = θ_adj.p
+
+    Δ_reordered = ChainRulesCore.Tangent{typeof(p)}(; W = ones(2, 2), b = [1.0, 2.0])
+    _, g_reordered, _ = ComponentArrays.getproperty_adjoint(Δ_reordered, θ_adj, :p)
+    @test g_reordered.a == 0.0
+    @test g_reordered.p.b == [1.0, 2.0]
+    @test g_reordered.p.W == ones(2, 2)
+
+    Δ_zero = ChainRulesCore.Tangent{typeof(p)}(; b = ChainRulesCore.ZeroTangent(), W = ones(2, 2))
+    _, g_zero, _ = ComponentArrays.getproperty_adjoint(Δ_zero, θ_adj, :p)
+    @test g_zero.p.b == [0.0, 0.0]
+    @test g_zero.p.W == ones(2, 2)
+
+    Δ_missing = ChainRulesCore.Tangent{typeof(p)}(; W = ones(2, 2))
+    _, g_missing, _ = ComponentArrays.getproperty_adjoint(Δ_missing, θ_adj, :p)
+    @test g_missing.p.b == [0.0, 0.0]
+    @test g_missing.p.W == ones(2, 2)
+
+    θ_nest = ComponentArray(x = ComponentArray(y = p))
+    Δ_nested = ChainRulesCore.Tangent{typeof(θ_nest.x)}(;
+        y = ChainRulesCore.Tangent{typeof(p)}(; W = 2 .* ones(2, 2), b = [3.0, 4.0]),
+    )
+    _, g_nested, _ = ComponentArrays.getproperty_adjoint(Δ_nested, θ_nest, :x)
+    @test g_nested.x.y.b == [3.0, 4.0]
+    @test g_nested.x.y.W == 2 .* ones(2, 2)
+
+    # Mixed Float32/Float64: promote eltype so Float64 values are not truncated.
+    Δ_mixed = ChainRulesCore.Tangent{typeof(p)}(;
+        b = Float32[1.0f0, 2.0f0], W = Float64[1.5 2.5; 3.5 4.5],
+    )
+    _, g_mixed, _ = ComponentArrays.getproperty_adjoint(Δ_mixed, θ_adj, :p)
+    @test eltype(g_mixed) === Float64
+    @test g_mixed.p.b == [1.0, 2.0]
+    @test g_mixed.p.W == Float64[1.5 2.5; 3.5 4.5]
+
+    # Float64 then Dual: promote to Dual (not MethodError Float64(::Dual)).
+    D = typeof(ForwardDiff.Dual(1.0))
+    Δ_dual = ChainRulesCore.Tangent{typeof(p)}(;
+        b = [1.0, 2.0], W = ones(D, 2, 2),
+    )
+    _, g_dual, _ = ComponentArrays.getproperty_adjoint(Δ_dual, θ_adj, :p)
+    @test eltype(g_dual) <: ForwardDiff.Dual
+    @test g_dual.p.b == D[1.0, 2.0]
+    @test g_dual.p.W == ones(D, 2, 2)
+
+    # Thunked tangent fields must be unthunked before fill.
+    Δ_thunk = ChainRulesCore.Tangent{typeof(p)}(;
+        W = ChainRulesCore.@thunk(ones(2, 2)), b = [1.0, 2.0],
+    )
+    _, g_thunk, _ = ComponentArrays.getproperty_adjoint(Δ_thunk, θ_adj, :p)
+    @test g_thunk.p.b == [1.0, 2.0]
+    @test g_thunk.p.W == ones(2, 2)
 end
 
 @testset "Tracker untrack" begin

@@ -12,6 +12,49 @@ function getproperty_adjoint(Δ, x, s)
     return (ChainRulesCore.NoTangent(), zero_x, ChainRulesCore.NoTangent())
 end
 
+# Composite NamedTuple/Tangent cotangents: fill a zero ComponentArray by field name.
+function getproperty_adjoint(Δ::ChainRulesCore.Tangent{<:Any, <:NamedTuple}, x, s)
+    return getproperty_adjoint(_fill_named_tangent(getproperty(x, s), Δ), x, s)
+end
+
+function getproperty_adjoint(Δ::NamedTuple, x, s)
+    return getproperty_adjoint(_fill_named_tangent(getproperty(x, s), Δ), x, s)
+end
+
+function _tangent_eltype(Δ, fallback)
+    T = fallback
+    for (_, v) in pairs(Δ)
+        v = ChainRulesCore.unthunk(v)
+        v isa ChainRulesCore.AbstractZero && continue
+        if v isa AbstractArray
+            T = promote_type(T, eltype(v))
+        elseif v isa Number
+            T = promote_type(T, typeof(v))
+        elseif v isa NamedTuple || v isa ChainRulesCore.Tangent
+            T = promote_type(T, _tangent_eltype(v, fallback))
+        end
+    end
+    return T
+end
+
+function _fill_named_tangent!(z, Δ)
+    for (k, v) in pairs(Δ)
+        v = ChainRulesCore.unthunk(v)
+        v isa ChainRulesCore.AbstractZero && continue
+        if v isa NamedTuple || v isa ChainRulesCore.Tangent
+            _fill_named_tangent!(getproperty(z, k), v)
+        else
+            setproperty!(z, k, v)
+        end
+    end
+    return z
+end
+
+function _fill_named_tangent(template, Δ)
+    T = _tangent_eltype(Δ, eltype(template))
+    return _fill_named_tangent!(zero(similar(template, T)), Δ)
+end
+
 __setproperty!(x, s, Δ) = __setproperty!(Val(false), x, s, Δ)
 function __setproperty!(::Val{false}, x, s, Δ)
     setproperty!(x, s, Δ)
