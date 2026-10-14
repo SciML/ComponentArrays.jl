@@ -25,5 +25,5 @@ jobs:
         with:
           julia-version: ${{ matrix.version }}
           script: "benchmark/benchmarks.jl"
-          extra-pkgs: "StableRNGs"
+          extra-pkgs: "StableRNGs,ADTypes,LabelledArrays,OrdinaryDiffEqRosenbrock,OrdinaryDiffEqTsit5"
           job-summary: true
