@@ -97,3 +97,14 @@ end
 function LinearAlgebra.ldiv!(B::AbstractVecOrMat, D::Diagonal{Float64, <:ComponentArray}, A::AbstractVecOrMat)
     return ldiv!(B, Diagonal(Vector(D.diag)), A)
 end
+
+# Base.sum!
+function Base.sum!(f::Function, r::ComponentArray, A::AbstractArray; init::Bool = true)
+    sum!(f, getdata(r), A; init)
+end
+function Base.sum!(f::Function, r::AbstractArray, A::ComponentArray; init::Bool = true)
+    sum!(f, getdata(r), getdata(A); init)
+end
+function Base.sum!(f::Function, r::ComponentArray, A::ComponentArray; init::Bool = true)
+    sum!(f, getdata(r), getdata(A); init)
+end
