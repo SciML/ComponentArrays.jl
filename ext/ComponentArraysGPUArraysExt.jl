@@ -1,7 +1,7 @@
 module ComponentArraysGPUArraysExt
 
 using ComponentArrays
-using LinearAlgebra: LinearAlgebra, dot, norm
+using LinearAlgebra: LinearAlgebra, dot, mul!, norm
 using GPUArrays: GPUArrays, AbstractGPUArray
 using ComponentArrays: recursive_eltype
 using Adapt: adapt
@@ -119,6 +119,57 @@ function LinearAlgebra.mul!(
     )
     return GPUArrays.generic_matmatmul!(C, A, B, a, b)
 end
+
+# Dispatch mixed products on the underlying GPU arrays before LinearAlgebra selects a backend.
+function LinearAlgebra.mul!(
+        C::GPUArrays.AbstractGPUVecOrMat,
+        A::GPUArrays.AbstractGPUVecOrMat,
+        B::GPUComponentVecorMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+function LinearAlgebra.mul!(
+        C::GPUArrays.AbstractGPUVecOrMat,
+        A::GPUComponentVecorMat,
+        B::GPUArrays.AbstractGPUVecOrMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+function LinearAlgebra.mul!(
+        C::GPUArrays.AbstractGPUVecOrMat,
+        A::GPUComponentVecorMat,
+        B::GPUComponentVecorMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+function LinearAlgebra.mul!(
+        C::GPUComponentVecorMat,
+        A::GPUArrays.AbstractGPUVecOrMat,
+        B::GPUArrays.AbstractGPUVecOrMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+function LinearAlgebra.mul!(
+        C::GPUComponentVecorMat,
+        A::GPUArrays.AbstractGPUVecOrMat,
+        B::GPUComponentVecorMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+function LinearAlgebra.mul!(
+        C::GPUComponentVecorMat,
+        A::GPUComponentVecorMat,
+        B::GPUArrays.AbstractGPUVecOrMat, a::Number, b::Number
+    )
+    mul!(getdata(C), getdata(A), getdata(B), a, b)
+    return C
+end
+
 function LinearAlgebra.mul!(
         C::GPUComponentVecorMat,
         A::GPUComponentVecorMat,
