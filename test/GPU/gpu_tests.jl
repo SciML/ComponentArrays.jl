@@ -51,6 +51,25 @@ end
         @test rmul!(jlca3, 2) == ComponentArray(jla .* 2, Axis(a = 1:2, b = 3:4))
     end
     @testset "mul!" begin
+        left = Float32[1 2 3; 4 5 6]
+        right = Float32[2 0; 1 3; 0 4]
+        initial = Float32[1 2; 3 4]
+        α, β = 2.0f0, 3.0f0
+        expected = α * (left * right) + β * initial
+
+        for wrap_C in (false, true), wrap_A in (false, true), wrap_B in (false, true)
+            @testset "wrapped operands (C, A, B) = ($wrap_C, $wrap_A, $wrap_B)" begin
+                C = jl(initial)
+                A = jl(left)
+                B = jl(right)
+                C = wrap_C ? ComponentArray(C, Axis(c = 1:2), Axis(c = 1:2)) : C
+                A = wrap_A ? ComponentArray(A, Axis(a = 1:2), Axis(a = 1:3)) : A
+                B = wrap_B ? ComponentArray(B, Axis(b = 1:3), Axis(b = 1:2)) : B
+                @test mul!(C, A, B, α, β) === C
+                @test Array(getdata(C)) == expected
+            end
+        end
+
         A = jlca .* jlca'
         @test_nowarn mul!(deepcopy(A), A, A, 1, 2)
         @test_nowarn mul!(deepcopy(A), A', A', 1, 2)
